@@ -19,7 +19,10 @@ import java.util.List;
 public interface UserInterface {
     
 
-    List<Users> getAllUsers();        
+    List<Users> getAllUsers();     
+    
+    ///////////////////// REGISTER //////////////////
+    void register(String username, String fullName, String email, String password, int phone);
     
     /////////////// REVIEWS /////////////
     void addReview(Integer userId, Integer eId, String review, Date rDate);

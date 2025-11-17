@@ -12,6 +12,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
@@ -70,6 +72,9 @@ public class Users implements Serializable {
     @NotNull
     @Column(name = "phone")
     private int phone;
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private UserGroupMaster groupId;
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL)
     @JsonbTransient
     private Collection<Bookings> bookingsCollection;
@@ -148,6 +153,18 @@ public class Users implements Serializable {
     public void setphone(int phone) {
         this.phone = phone;
     }
+
+    public UserGroupMaster getgroupId() {
+        return groupId;
+    }
+
+    public void setgroupId(UserGroupMaster groupId) {
+        this.groupId = groupId;
+    }
+
+    
+    
+    
     
     @JsonbTransient
     public Collection<Bookings> getBookingsCollection() {

@@ -14,25 +14,23 @@ import entity.Interests;
 import entity.Payments;
 import entity.Reviews;
 import entity.Tickets;
+import entity.UserGroupMaster;
 import entity.Users;
 import entity.Wishlists;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import jakarta.security.enterprise.identitystore.Pbkdf2PasswordHash;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-/**
- *
- * @author HP
- */
 @Stateless
 public class UserBean implements UserInterface {
 
@@ -41,6 +39,44 @@ public class UserBean implements UserInterface {
     
     @EJB AdminInterface adminBean;
     
+    @Inject
+    Pbkdf2PasswordHash passwordHasher;
+    
+    /////////////////////// REGISTER //////////////////
+    @Override
+    public void register(String username, String fullName, String email,
+            String password, int phone) {
+
+        Users user = new Users();
+        user.setusername(username);
+        user.setfullName(fullName);
+        user.setemail(email);
+
+        // ------------------------------------------------------------------
+        // CRITICAL CHANGE: Hash the password before setting it
+        String hashedPassword = passwordHasher.generate(password.toCharArray());
+        user.setpassword(hashedPassword);
+        // ------------------------------------------------------------------
+
+        user.setphone(phone);
+
+        // Assign group → default: User
+        // Note: This relies on UserGroupMaster ID 2 existing.
+        UserGroupMaster group = em.find(UserGroupMaster.class, 2);
+        user.setgroupId(group);
+
+        // --- Bi-directional sync ---
+        Collection<Users> usersList = group.getUsers();
+        usersList.add(user);
+        group.setUsers(usersList);
+
+        // Persist user
+        em.persist(user);
+
+        // Merge back group only if needed
+        em.merge(group);
+    }
+
     
     //////////// REVIEWS ///////////////
     @Override

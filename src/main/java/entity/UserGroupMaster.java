@@ -4,7 +4,7 @@
  */
 package entity;
 
-import jakarta.persistence.Basic;
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,10 +12,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  *
@@ -44,6 +46,11 @@ public class UserGroupMaster implements Serializable {
     @Size(max = 50)
     @Column(name = "username", nullable = true)
     private String username;
+    
+    @OneToMany(mappedBy = "groupId")
+    @JsonbTransient
+    private Collection<Users> users;
+
 
 
     public UserGroupMaster() {
@@ -82,6 +89,16 @@ public class UserGroupMaster implements Serializable {
     public void setUsername(String username) {
         this.username = username;
     }
+
+    public Collection<Users> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Collection<Users> users) {
+        this.users = users;
+    }
+    
+    
 
     @Override
     public int hashCode() {

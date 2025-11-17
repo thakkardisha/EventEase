@@ -4,7 +4,9 @@ entity\Interests.class
 entity\Payments.class
 eventease\resources\JakartaEE10Resource.class
 eventease\resources\rest\admin\AdminResource.class
+record\KeepRecord.class
 entity\Events.class
+beans\LoginBean.class
 entity\Users.class
 entity\UserGroupMaster.class
 utils\EntityMergeUtil.class
@@ -14,13 +16,17 @@ ejb\impl\user\UserBean.class
 ejb\interfaces\admin\AdminInterface.class
 entity\Reviews.class
 entity\Categories.class
+filter\NoCacheFilter.class
+config\Project.class
 entity\CouponUsage.class
 entity\Tickets.class
 entity\Artists.class
 entity\ArtistSocialLinks.class
 entity\Coupons.class
 eventease\JakartaRestConfiguration.class
+auth\SecureAuthentication.class
 entity\EventImages.class
 ejb\interfaces\user\UserInterface.class
 entity\Wishlists.class
+beans\RegisterBean.class
 entity\AuditLogs.class

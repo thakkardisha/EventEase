@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<h:head>
+    <title>Register User</title>
+</h:head>
+
+<h:body>
+
+    <h:form id="regForm">
+
+        <h2>Register User</h2>
+
+        <h:outputLabel value="Username:" for="username"/>
+        <h:inputText id="username" value="#{registerBean.username}" /><br/><br/>
+
+        <h:outputLabel value="Full Name:" for="fullName"/>
+        <h:inputText id="fullName" value="#{registerBean.fullName}" /><br/><br/>
+
+        <h:outputLabel value="Email:" for="email"/>
+        <h:inputText id="email" value="#{registerBean.email}" /><br/><br/>
+
+        <h:outputLabel value="Password:" for="password"/>
+        <h:inputSecret id="password" value="#{registerBean.password}" /><br/><br/>
+
+        <h:outputLabel value="Phone:" for="phone"/>
+        <h:inputText id="phone" value="#{registerBean.phone}" /><br/><br/>
+
+        <h:commandButton value="Register" onclick="registerUser(); return false;" />
+
+        <br/><br/>
+        <h:outputText id="resultMsg" value="#{registerBean.resultMessage}" 
+                      style="color:green; font-weight:bold;" />
+
+    </h:form>
+
+    <!-- JavaScript to call REST -->
+    <script>
+        async function registerUser() {
+            const username = document.getElementById("regForm:username").value;
+            const fullName = document.getElementById("regForm:fullName").value;
+            const email = document.getElementById("regForm:email").value;
+            const password = document.getElementById("regForm:password").value;
+            const phone = document.getElementById("regForm:phone").value;
+
+            // Basic validation
+            if (!username || !fullName || !email || !password || !phone) {
+                document.getElementById("regForm:resultMsg").innerText =
+                        "All fields are required!";
+                return;
+            }
+
+            const payload = {
+                username: username,
+                fullName: fullName,
+                email: email,
+                password: password,
+                phone: parseInt(phone)
+            };
+
+            try {
+                const response = await fetch("/EventEase/api/user/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                document.getElementById("regForm:resultMsg").innerText = data.message;
+
+            } catch (e) {
+                document.getElementById("regForm:resultMsg").innerText = 
+                        "Registration failed!";
+            }
+        }
+    </script>
+
+</h:body>
+</html>

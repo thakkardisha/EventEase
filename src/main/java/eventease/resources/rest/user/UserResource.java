@@ -7,8 +7,9 @@ import entity.Payments;
 import entity.Users;
 
 import jakarta.annotation.security.DeclareRoles;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -18,7 +19,7 @@ import java.util.Date;
 import java.util.List;
 
 @Path("/user")
-@DeclareRoles({"Admin", "User"})
+//@DeclareRoles({"Admin", "User"})
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserResource {
@@ -36,6 +37,43 @@ public class UserResource {
         return sdf.parse(dateStr);
     }
 
+    
+    ///////////////////// REGISTER ////////////////////////
+    @Path("register")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response registerUser(Users user) {
+
+        try {
+            userBean.register(
+                    user.getusername(),
+                    user.getfullName(),
+                    user.getemail(),
+                    user.getpassword(),
+                    user.getphone()
+            );
+
+            JsonObject response = Json.createObjectBuilder()
+                    .add("message", "User registered successfully")
+                    .add("username", user.getusername())
+                    .add("group", "User")
+                    .build();
+
+            return Response.status(Response.Status.CREATED)
+                    .entity(response)
+                    .build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: " + e.getMessage())
+                    .build();
+        }
+    }
+
+
+    
+    
     // ======================================================
     //                     REVIEWS
     // ======================================================
