@@ -1,24 +1,146 @@
-<?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html">
-    <h:head>
-        <title>Facelet Title</title>
-    </h:head>
-    <h:body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventEase Login</title>
 
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #0b043a; 
+            color: #F4F0F8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
 
-        <form method="POST">
-        <table border="1">
-            <tr>  
-                <td>User Name</td> <td><input type="text" name="username"  value=""/></td></tr>
-          
-            <tr>   <td>Password </td> <td><input type="password" name="password" value=""/></td></tr>
-            <tr><td><input type="submit" value="Login"/></td><td><input type="reset" value="Reset"/></td></tr>
-  
-        </table>
+        .logo {
+            width: 220px;
+            margin-bottom: 95px;
+        }
+        
+        .login-container{
+            margin-top: -60px;
+        }
+
+        h2 {
+            margin: 0 0 25px 0;
+            font-weight: 400;
+            letter-spacing: 1px;
+            color: #F4F0F8;
+            margin-bottom: 55px;
+            text-align: center;
+        }
+
+        form {
+            width: 320px;
+        }
+
+        .input-field {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #DCD2EA;
+            font-family: gadugi;
+        }
+
+        .input-field input {
+            width: 100%;
+            height: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #A89BBF;
+            background: rgba(255, 255, 255, 0.08);
+            color: #F4F0F8;
+            font-size: 15px;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: #C8B8E8;
+        }
+
+        .btn-login {
+            width: 107%;
+            padding: 10px;
+            background-color: #A89BBF;
+            border: none;
+            border-radius: 6px;
+            font-family: gadugi;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #0B0631;            
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: #C8B8E8;
+        }
+       
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 15px;
+            font-family: gadugi;
+        }
+
+        .register-link a {
+            color: #C8B8E8;
+            text-decoration: none;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        
+        .error-text {
+            margin-top: 15px;
+            height: 22px;
+            color: #FF8A8A;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <img src="images/EventEase.png" alt="EventEase Logo" class="logo" />
+
+    <div class="login-container">
+        <h2>LOGIN</h2>
+
+        <form method="POST" action="">
+            <div class="input-field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" />
+            </div>
+
+            <div class="input-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" />
+            </div>
+
+            <button type="submit" class="btn-login">Login</button>
         </form>
-        <br/>
-        <h:outputText id="err" style="color:red" value="#{loginBean.errorStatus}"/>
-    </h:body>
+        
+        <div class="register-link">
+            New to EventEase? <a href="register.jsf">Register here</a>
+        </div>
+
+        <div class="error-text">
+            #{loginBean.errorStatus}
+        </div>
+    </div>
+
+</body>
 </html>

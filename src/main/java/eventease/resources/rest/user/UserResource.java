@@ -55,7 +55,7 @@ public class UserResource {
             );
 
             JsonObject response = Json.createObjectBuilder()
-                    .add("message", "User registered successfully")
+                    .add("message", "Your account has been registered successfully.")
                     .add("username", user.getusername())
                     .add("group", "User")
                     .build();

@@ -2,81 +2,144 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html">
 
-<h:head>
-    <title>Register User</title>
-</h:head>
+    <h:head>
+        <title>Register</title>
+        <h:outputStylesheet name="css/eventease.css"/>
+    </h:head>
 
-<h:body>
+    <h:body>
 
-    <h:form id="regForm">
+        <img src="images/EventEase.png" alt="EventEase Logo" class="logo"/>
 
-        <h2>Register User</h2>
+        <div class="auth-container">
 
-        <h:outputLabel value="Username:" for="username"/>
-        <h:inputText id="username" value="#{registerBean.username}" /><br/><br/>
+            <h2 class="auth-title">CREATE ACCOUNT</h2>
+            <p class="auth-subtitle">Join EventEase Today</p>
 
-        <h:outputLabel value="Full Name:" for="fullName"/>
-        <h:inputText id="fullName" value="#{registerBean.fullName}" /><br/><br/>
+            <h:form id="regForm">
 
-        <h:outputLabel value="Email:" for="email"/>
-        <h:inputText id="email" value="#{registerBean.email}" /><br/><br/>
+                <div class="form-grid">
 
-        <h:outputLabel value="Password:" for="password"/>
-        <h:inputSecret id="password" value="#{registerBean.password}" /><br/><br/>
+                    <div class="input-field">
+                        <label for="username">Username</label>
+                        <h:inputText id="username" value="#{registerBean.username}" />
+                    </div>
 
-        <h:outputLabel value="Phone:" for="phone"/>
-        <h:inputText id="phone" value="#{registerBean.phone}" /><br/><br/>
+                    <div class="input-field">
+                        <label for="fullName">Full Name</label>
+                        <h:inputText id="fullName" value="#{registerBean.fullName}" />
+                    </div>
 
-        <h:commandButton value="Register" onclick="registerUser(); return false;" />
+                    <div class="input-field">
+                        <label for="email">Email</label>
+                        <h:inputText id="email" value="#{registerBean.email}" />
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="phone">Phone</label>
+                        <h:inputText id="phone" value="#{registerBean.phone}" />
+                    </div>
 
-        <br/><br/>
-        <h:outputText id="resultMsg" value="#{registerBean.resultMessage}" 
-                      style="color:green; font-weight:bold;" />
+                    <div class="input-field">
+                        <label for="password">Password</label>
+                        <h:inputSecret id="password" value="#{registerBean.password}" />
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <h:inputSecret id="confirmPassword" />
+                    </div>                    
+                </div>
 
-    </h:form>
+                <h:commandButton value="Create Account"
+                                 styleClass="btn-auth"
+                                 onclick="registerUser(); return false;" />
 
-    <!-- JavaScript to call REST -->
-    <script>
-        async function registerUser() {
-            const username = document.getElementById("regForm:username").value;
-            const fullName = document.getElementById("regForm:fullName").value;
-            const email = document.getElementById("regForm:email").value;
-            const password = document.getElementById("regForm:password").value;
-            const phone = document.getElementById("regForm:phone").value;
+                <div class="error-text" id="regForm:resultMsg">
+                    #{registerBean.resultMessage}
+                </div>
 
-            // Basic validation
-            if (!username || !fullName || !email || !password || !phone) {
-                document.getElementById("regForm:resultMsg").innerText =
-                        "All fields are required!";
-                return;
+                <div class="switch-link">
+                    Already have an account?
+                    <a href="Login.jsf">Login</a>
+                </div>
+
+            </h:form>
+
+        </div>
+
+        <script>
+            async function registerUser() {
+
+                const get = id => document.getElementById("regForm:" + id).value;
+
+                const username = get("username");
+                const fullName = get("fullName");
+                const email = get("email");
+                const password = get("password");
+                const confirmPassword = get("confirmPassword");
+                const phone = get("phone");
+
+                if (!username || !fullName || !email || !password || !confirmPassword || !phone) {
+                    document.getElementById("regForm:resultMsg").innerText =
+                            "All fields are required!";
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    document.getElementById("regForm:resultMsg").innerText =
+                            "Passwords do not match!";
+                    return;
+                }
+
+                const payload = {username, fullName, email, password, phone: parseInt(phone)};
+
+                try {
+                    const response = await fetch("/EventEase/api/user/register", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+
+                        document.getElementById("modalTitle").innerText =
+                                "Welcome to EventEase, " + username + "!";
+
+                        document.getElementById("modalMessage").innerText =
+                                "Your account has been created. Login to continue.";
+
+                        document.getElementById("successModal").style.display = "flex";
+
+                    } else {
+                        document.getElementById("regForm:resultMsg").innerText =
+                                data.message || "Registration failed!";
+                    }
+
+                } catch (e) {
+                    document.getElementById("regForm:resultMsg").innerText =
+                            "Registration failed!";
+                }
             }
+        </script>
 
-            const payload = {
-                username: username,
-                fullName: fullName,
-                email: email,
-                password: password,
-                phone: parseInt(phone)
-            };
 
-            try {
-                const response = await fetch("/EventEase/api/user/register", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                });
+        <!-- Success Modal -->
+        <div id="successModal" class="modal-overlay">
+            <div class="modal-box">
 
-                const data = await response.json();
-                document.getElementById("regForm:resultMsg").innerText = data.message;
+                <div class="modal-icon success-icon">✔️</div>
 
-            } catch (e) {
-                document.getElementById("regForm:resultMsg").innerText = 
-                        "Registration failed!";
-            }
-        }
-    </script>
+                <h3 id="modalTitle">Welcome to EventEase</h3>
+                <p id="modalMessage">Login to continue.</p>
 
-</h:body>
+                <button class="modal-btn" onclick="window.location.href = 'Login.jsf'">
+                    Go to Login
+                </button>
+            </div>
+        </div>
+
+    </h:body>
 </html>
