@@ -13,13 +13,11 @@ import entity.Payments;
 import entity.Reviews;
 import entity.Venues;
 import entity.Wishlists;
-import jakarta.annotation.security.DeclareRoles;
-import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -48,40 +46,42 @@ public class AdminResource {
     ////////////// EVENTS SPECIFIC /////////////
 
     @POST
-    //@RolesAllowed({"Admin"})
-    @Path("event/create/{eName}/{description}/{eventDate}/{startTime}/{endTime}/{unitPrice}/{vId}/{cId}/{maxCapacity}/{bannerImg}/{status}")
+    @Path("event/create")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response createEvent(
-            @PathParam("eName") String eName,
-            @PathParam("description") String description,
-            @PathParam("eventDate") String eventDate,
-            @PathParam("startTime") String startTime,
-            @PathParam("endTime") String endTime,
-            @PathParam("unitPrice") BigDecimal unitPrice,
-            @PathParam("vId") Integer vId,
-            @PathParam("cId") Integer cId,
-            @PathParam("maxCapacity") Integer maxCapacity,
-            @PathParam("bannerImg") String bannerImg,
-            @PathParam("status") String status) {
-
+            @FormParam("eName") String eName,
+            @FormParam("description") String description,
+            @FormParam("eventDate") String eventDate,
+            @FormParam("startTime") String startTime,
+            @FormParam("endTime") String endTime,
+            @FormParam("unitPrice") String unitPrice,
+            @FormParam("vId") Integer vId,
+            @FormParam("cId") Integer cId,
+            @FormParam("maxCapacity") Integer maxCapacity,
+            @FormParam("bannerImg") String bannerImg,
+            @FormParam("status") String status) {
         try {
+            System.out.println("REST: Creating event: " + eName);
+            System.out.println("REST: Venue ID: " + vId + ", Category ID: " + cId);
+
             adminBean.createEvent(
                     eName,
                     description,
                     LocalDate.parse(eventDate),
                     LocalTime.parse(startTime),
                     LocalTime.parse(endTime),
-                    unitPrice,
+                    new BigDecimal(unitPrice),
                     vId,
                     cId,
                     maxCapacity,
                     bannerImg,
                     status
             );
-
             return Response.ok("Event created successfully.").build();
         } catch (Exception e) {
+            e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Error : " + e.getMessage())
+                    .entity("Error: " + e.getMessage())
                     .build();
         }
     }

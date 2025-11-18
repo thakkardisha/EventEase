@@ -31,7 +31,6 @@ entity\Coupons.class
 eventease\JakartaRestConfiguration.class
 beans\AdminDashboardBean.class
 auth\SecureAuthentication.class
-client\AdminClient$1.class
 entity\EventImages.class
 ejb\interfaces\user\UserInterface.class
 entity\Wishlists.class

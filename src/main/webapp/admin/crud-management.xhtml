@@ -91,7 +91,7 @@
 
         <h:form id="eventDialogForm">
 
-<!--            <p:messages id="dialogMsgs" autoUpdate="true" />-->
+<!--            <p:messages id="dialogMsgs" showDetail="true" autoUpdate="true" />-->
 
             <p:panelGrid columns="2" columnClasses="label,value" style="width:100%">
 
@@ -117,10 +117,10 @@
                 <p:inputText id="price" value="#{eventCrudBean.current.unitPrice}" />
 
                 <h:outputLabel value="Venue ID:" for="venue" />
-                <p:inputText id="venue" value="#{eventCrudBean.venueId}" />
+                <p:inputText id="venue" value="#{eventCrudBean.venueId}" required="true" />
 
                 <h:outputLabel value="Category ID:" for="category" />
-                <p:inputText id="category" value="#{eventCrudBean.categoryId}" />
+                <p:inputText id="category" value="#{eventCrudBean.categoryId}" required="true" />
 
                 <h:outputLabel value="Max Capacity:" for="cap" />
                 <p:inputText id="cap" value="#{eventCrudBean.current.maxCapacity}" />
@@ -133,18 +133,22 @@
 
             </p:panelGrid>
 
-            <p:separator />
+            <p:separator style="margin: 15px 0;" />
 
-            <!-- SAVE -->
-            <p:commandButton value="Save"
-                             actionListener="#{eventCrudBean.save}"
-                             update=":crudForm:eventTable :crudForm:msgs"
-                             oncomplete="if (!args.validationFailed) PF('eventDialog').hide()" />
+            <div style="text-align: right;">
+                <!-- SAVE -->
+                <p:commandButton value="Save"
+                                 actionListener="#{eventCrudBean.save}"
+                                 update="eventDialogForm :crudForm:eventTable :crudForm:msgs"
+                                 oncomplete="if (!args.validationFailed) PF('eventDialog').hide()" 
+                                 process="@form"
+                                 style="margin-right: 10px;" />
 
-            <!-- CANCEL -->
-            <p:commandButton value="Cancel"
-                             type="button"
-                             onclick="PF('eventDialog').hide()" />
+                <!-- CANCEL -->
+                <p:commandButton value="Cancel"
+                                 type="button"
+                                 onclick="PF('eventDialog').hide()" />
+            </div>
 
         </h:form>
 
