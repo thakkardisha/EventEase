@@ -1,0 +1,153 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    
+    <f:metadata>
+        <f:viewAction action="#{eventCrudBean.init}" />
+    </f:metadata>
+
+
+    <h:form id="crudForm">
+
+        <!-- GLOBAL MESSAGES -->
+<!--        <p:messages id="msgs" showDetail="true" autoUpdate="true" />-->
+
+        <h2 style="margin-bottom: 12px;">Events — CRUD Management</h2>
+
+        <!-- ADD BUTTON -->
+        <p:commandButton value="Add New Event"
+                         icon="pi pi-plus"
+                         styleClass="p-mb-3"
+                         actionListener="#{eventCrudBean.prepareNew}"
+                         update=":eventDialogForm"
+                         oncomplete="PF('eventDialog').show()" />
+
+        <!-- TABLE -->
+        <p:dataTable id="eventTable" var="evt"
+                     value="#{eventCrudBean.events}"
+                     paginator="true" rows="8"
+                     selectionMode="single"
+                     selection="#{eventCrudBean.selected}"
+                     rowKey="#{evt.eId}"
+                     style="margin-top:10px">
+
+            <p:column headerText="ID" style="width:6%">
+                <h:outputText value="#{evt.eId}" />
+            </p:column>
+
+            <p:column headerText="Name">
+                <h:outputText value="#{evt.eName}" />
+            </p:column>
+
+            <p:column headerText="Date">
+                <h:outputText value="#{evt.eventDate}" />
+            </p:column>
+
+            <p:column headerText="Venue">
+                <h:outputText value="#{evt.vId != null ? evt.vId.vName : ''}" />
+            </p:column>
+
+            <p:column headerText="Category">
+                <h:outputText value="#{evt.cId != null ? evt.cId.cName : ''}" />
+            </p:column>
+
+            <p:column headerText="Price">
+                <h:outputText value="#{evt.unitPrice}" />
+            </p:column>
+
+            <p:column headerText="Status">
+                <h:outputText value="#{evt.status}" />
+            </p:column>
+
+            <p:column headerText="Actions" style="width:18%">
+
+                <!-- EDIT -->
+                <p:commandButton icon="pi pi-pencil"
+                                 title="Edit"
+                                 actionListener="#{eventCrudBean.prepareEdit(evt)}"
+                                 update=":eventDialogForm"
+                                 oncomplete="PF('eventDialog').show()"
+                                 styleClass="p-button-rounded p-button-sm" />
+
+                <!-- DELETE -->
+                <p:commandButton icon="pi pi-trash"
+                                 title="Delete"
+                                 actionListener="#{eventCrudBean.delete(evt.eId)}"
+                                 update="eventTable msgs"
+                                 onclick="return confirm('Delete this event?')"
+                                 styleClass="p-button-rounded p-button-sm p-button-danger" />
+            </p:column>
+
+        </p:dataTable>
+
+    </h:form>
+
+
+    <!-- DIALOG -->
+    <p:dialog id="eventDialog" header="Event Details" widgetVar="eventDialog"
+              modal="true" resizable="false" width="640">
+
+        <h:form id="eventDialogForm">
+
+<!--            <p:messages id="dialogMsgs" autoUpdate="true" />-->
+
+            <p:panelGrid columns="2" columnClasses="label,value" style="width:100%">
+
+                <h:outputLabel value="Name:" for="name" />
+                <p:inputText id="name" value="#{eventCrudBean.current.eName}" required="true" />
+
+                <h:outputLabel value="Description:" for="desc" />
+                <p:inputTextarea id="desc" value="#{eventCrudBean.current.description}" rows="3" />
+
+                <h:outputLabel value="Event Date:" for="date" />
+                <p:datePicker id="date" value="#{eventCrudBean.current.eventDate}"
+                              pattern="yyyy-MM-dd" required="true" />
+
+                <h:outputLabel value="Start Time:" for="start" />
+                <p:datePicker id="start" value="#{eventCrudBean.current.startTime}"
+                              timeOnly="true" pattern="HH:mm" required="true" />
+
+                <h:outputLabel value="End Time:" for="end" />
+                <p:datePicker id="end" value="#{eventCrudBean.current.endTime}"
+                              timeOnly="true" pattern="HH:mm" />
+
+                <h:outputLabel value="Unit Price:" for="price" />
+                <p:inputText id="price" value="#{eventCrudBean.current.unitPrice}" />
+
+                <h:outputLabel value="Venue ID:" for="venue" />
+                <p:inputText id="venue" value="#{eventCrudBean.venueId}" />
+
+                <h:outputLabel value="Category ID:" for="category" />
+                <p:inputText id="category" value="#{eventCrudBean.categoryId}" />
+
+                <h:outputLabel value="Max Capacity:" for="cap" />
+                <p:inputText id="cap" value="#{eventCrudBean.current.maxCapacity}" />
+
+                <h:outputLabel value="Banner Image URL:" for="banner" />
+                <p:inputText id="banner" value="#{eventCrudBean.current.bannerImg}" />
+
+                <h:outputLabel value="Status:" for="status" />
+                <p:inputText id="status" value="#{eventCrudBean.current.status}" />
+
+            </p:panelGrid>
+
+            <p:separator />
+
+            <!-- SAVE -->
+            <p:commandButton value="Save"
+                             actionListener="#{eventCrudBean.save}"
+                             update=":crudForm:eventTable :crudForm:msgs"
+                             oncomplete="if (!args.validationFailed) PF('eventDialog').hide()" />
+
+            <!-- CANCEL -->
+            <p:commandButton value="Cancel"
+                             type="button"
+                             onclick="PF('eventDialog').hide()" />
+
+        </h:form>
+
+    </p:dialog>
+
+</ui:composition>

@@ -8,6 +8,7 @@ D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\jwtrest\TokenProvider.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\jwtrest\JWTCredential.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Venues.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\config\Project.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\EventCrudBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\utils\EntityMergeUtil.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Artists.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\eventease\resources\rest\admin\AdminResource.java
@@ -17,6 +18,7 @@ D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\auth\SecureAuthentication.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\eventease\resources\JakartaEE10Resource.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\ejb\interfaces\user\UserInterface.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Tickets.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\client\AdminClient.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\ArtistSocialLinks.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\ejb\interfaces\admin\AdminInterface.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Bookings.java
@@ -24,6 +26,7 @@ D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\AuditLogs.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\LoginBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\ejb\impl\user\UserBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\CouponUsage.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\AdminDashboardBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Interests.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\RegisterBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\eventease\JakartaRestConfiguration.java
