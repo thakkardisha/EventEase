@@ -139,36 +139,29 @@ public class EventCrudBean implements Serializable {
             } else {
                 System.out.println("========== UPDATING EVENT ==========");
 
-                // UPDATE -> PUT /event/{id} with JSON body
+                // UPDATE -> PUT /event/{id} with Form data
                 Integer id = current.geteId();
 
-                // Create a simplified map to avoid circular reference issues
-                Map<String, Object> eventData = new HashMap<>();
-                eventData.put("eId", id);
-                eventData.put("eName", current.geteName());
-                eventData.put("description", current.getdescription());
-                eventData.put("eventDate", current.geteventDate().toString());
-                eventData.put("startTime", current.getstartTime().toString());
-                eventData.put("endTime", current.getendTime() != null ? current.getendTime().toString() : null);
-                eventData.put("unitPrice", current.getunitPrice());
-                eventData.put("maxCapacity", current.getmaxCapacity());
-                eventData.put("bannerImg", current.getbannerImg());
-                eventData.put("status", current.getstatus());
-
-                // Add venue and category as nested objects
-                Map<String, Integer> venue = new HashMap<>();
-                venue.put("vId", venueId);
-                eventData.put("vId", venue);
-
-                Map<String, Integer> category = new HashMap<>();
-                category.put("cId", categoryId);
-                eventData.put("cId", category);
+                // Create form data (same as create)
+                Form form = new Form();
+                form.param("eName", safe(current.geteName()));
+                form.param("description", safe(current.getdescription()));
+                form.param("eventDate", current.geteventDate() != null ? current.geteventDate().toString() : "");
+                form.param("startTime", current.getstartTime() != null ? current.getstartTime().toString() : "00:00");
+                form.param("endTime", current.getendTime() != null ? current.getendTime().toString() : "");
+                form.param("unitPrice", current.getunitPrice() != null ? current.getunitPrice().toString() : "0");
+                form.param("vId", venueId != null ? venueId.toString() : "0");
+                form.param("cId", categoryId != null ? categoryId.toString() : "0");
+                form.param("maxCapacity", current.getmaxCapacity() != null ? current.getmaxCapacity().toString() : "0");
+                form.param("bannerImg", safe(current.getbannerImg()));
+                form.param("status", safe(current.getstatus()));
 
                 WebTarget target = client.target(API_BASE).path("event").path(String.valueOf(id));
                 System.out.println("Calling: " + target.getUri());
+                System.out.println("Form params: " + form.asMap());
 
                 Response r = target.request(MediaType.APPLICATION_JSON)
-                        .put(Entity.entity(eventData, MediaType.APPLICATION_JSON));
+                        .put(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 
                 int status_code = r.getStatus();
                 String responseBody = r.readEntity(String.class);

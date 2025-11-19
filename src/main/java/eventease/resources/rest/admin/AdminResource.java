@@ -14,6 +14,8 @@ import entity.Reviews;
 import entity.Venues;
 import entity.Wishlists;
 import jakarta.ejb.EJB;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -41,6 +43,9 @@ public class AdminResource {
 
     @EJB
     private AdminInterface adminBean;
+    
+    @PersistenceContext
+    private EntityManager em;
         
 
     ////////////// EVENTS SPECIFIC /////////////
@@ -87,18 +92,73 @@ public class AdminResource {
     }
 
     @PUT
-    //@RolesAllowed({"Admin"})
     @Path("event/{id}")
-    public Response updateEvent(@PathParam("id") Integer id, Events event) {
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateEvent(
+            @PathParam("id") Integer id,
+            @FormParam("eName") String eName,
+            @FormParam("description") String description,
+            @FormParam("eventDate") String eventDate,
+            @FormParam("startTime") String startTime,
+            @FormParam("endTime") String endTime,
+            @FormParam("unitPrice") String unitPrice,
+            @FormParam("vId") Integer vId,
+            @FormParam("cId") Integer cId,
+            @FormParam("maxCapacity") Integer maxCapacity,
+            @FormParam("bannerImg") String bannerImg,
+            @FormParam("status") String status) {
         try {
-            event.seteId(id);
+            System.out.println("========== REST UPDATE ENDPOINT HIT ==========");
+            System.out.println("REST: Updating event ID: " + id);
+            System.out.println("REST: Event Name: " + eName);
+            System.out.println("REST: Venue ID: " + vId + ", Category ID: " + cId);
+
+            // Fetch existing event
+            Events event = em.find(Events.class, id);
+            if (event == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Event with ID " + id + " not found.")
+                        .build();
+            }
+
+            // Fetch venue and category
+            Venues venue = em.find(Venues.class, vId);
+            Categories category = em.find(Categories.class, cId);
+
+            if (venue == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Venue with ID " + vId + " not found.")
+                        .build();
+            }
+            if (category == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Category with ID " + cId + " not found.")
+                        .build();
+            }
+
+            // Update fields
+            event.seteName(eName);
+            event.setdescription(description);
+            event.seteventDate(LocalDate.parse(eventDate));
+            event.setstartTime(LocalTime.parse(startTime));
+            event.setendTime(endTime != null && !endTime.isEmpty() ? LocalTime.parse(endTime) : null);
+            event.setunitPrice(new BigDecimal(unitPrice));
+            event.setvId(venue);
+            event.setcId(category);
+            event.setmaxCapacity(maxCapacity);
+            event.setbannerImg(bannerImg);
+            event.setstatus(status);
+
+            // Use the adminBean method
             adminBean.updateEvent(event);
+
+            System.out.println("REST: Event updated successfully");
             return Response.ok("Event updated successfully").build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(e.getMessage())
-                    .build();
+
         } catch (Exception e) {
+            System.out.println("REST ERROR: " + e.getMessage());
+            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error updating event: " + e.getMessage())
                     .build();

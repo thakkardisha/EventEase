@@ -88,7 +88,7 @@ public class SecureAuthentication implements HttpAuthenticationMechanism, Serial
 
                     // C. Role-Based Redirection (JSF navigation)
                     if (result.getCallerGroups().contains("Admin")) {
-                        request.getRequestDispatcher("admin/Admin.jsf").forward(request, response);
+                        request.getRequestDispatcher("admin/admin-dashboard.jsf").forward(request, response);
                         // Return SUCCESS after forward
                         return AuthenticationStatus.SUCCESS;
                     } 
