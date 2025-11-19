@@ -34,7 +34,7 @@
     </servlet>
     
 
-<!--    <security-constraint>
+    <security-constraint>
         <display-name>Constraint2</display-name>
         <web-resource-collection>
             <web-resource-name>all</web-resource-name>
@@ -45,7 +45,7 @@
             <description/>
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
-    </security-constraint>-->
+    </security-constraint>
  
     <error-page>
         <error-code>403</error-code>

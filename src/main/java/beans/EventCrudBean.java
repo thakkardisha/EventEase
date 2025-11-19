@@ -33,7 +33,7 @@ public class EventCrudBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
   
-    private static final String API_BASE = "http://localhost:8080/EventEase/api/admin/"; 
+    private static final String API_BASE = "https://localhost:8181/EventEase/api/admin/"; 
 
     private static final String UPLOAD_DIR = "D:/ICT/Sem1/102 - Java EE/EventEase/uploads/banners/";
     
