@@ -17,6 +17,7 @@ entity\Venues.class
 ejb\impl\admin\AdminBean.class
 jwtrest\Constants.class
 beans\EventCrudBean.class
+servlets\ImageServlet.class
 ejb\impl\user\UserBean.class
 ejb\interfaces\admin\AdminInterface.class
 entity\Reviews.class

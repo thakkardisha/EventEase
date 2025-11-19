@@ -89,7 +89,7 @@
     <p:dialog id="eventDialog" header="Event Details" widgetVar="eventDialog"
               modal="true" resizable="false" width="640">
 
-        <h:form id="eventDialogForm">
+        <h:form id="eventDialogForm" enctype="multipart/form-data">
 
 <!--            <p:messages id="dialogMsgs" showDetail="true" autoUpdate="true" />-->
 
@@ -125,8 +125,27 @@
                 <h:outputLabel value="Max Capacity:" for="cap" />
                 <p:inputText id="cap" value="#{eventCrudBean.current.maxCapacity}" />
 
-                <h:outputLabel value="Banner Image URL:" for="banner" />
-                <p:inputText id="banner" value="#{eventCrudBean.current.bannerImg}" />
+                <h:outputLabel value="Banner Image:" for="banner" />
+                <p:fileUpload id="banner" 
+                              mode="advanced" 
+                              auto="true"
+                              fileLimit="1"
+                              allowTypes="/(\.|\/)(jpe?g|png|gif)$/i"
+                              listener="#{eventCrudBean.handleFileUpload}"
+                              update="dialogMsgs currentImagePanel"
+                              skinSimple="true" />
+
+                <!-- Show current/uploaded image -->
+                <h:outputLabel value="Current Image:" />
+                <h:panelGroup id="currentImagePanel">
+                    <h:outputText value="#{eventCrudBean.current.bannerImg}" 
+                                  rendered="#{eventCrudBean.current.bannerImg != null and eventCrudBean.current.bannerImg != ''}"
+                                  style="display: block; margin-bottom: 10px;" />
+                    <p:graphicImage value="/uploads/banners/#{eventCrudBean.current.bannerImg}" 
+                                    width="200" 
+                                    rendered="#{eventCrudBean.current.bannerImg != null and eventCrudBean.current.bannerImg != ''}"
+                                    style="margin-top: 5px;" />
+                </h:panelGroup>
 
                 <h:outputLabel value="Status:" for="status" />
                 <p:inputText id="status" value="#{eventCrudBean.current.status}" />

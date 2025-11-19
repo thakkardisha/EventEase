@@ -1,7 +1,16 @@
 package beans;
 
 import entity.Events;
-
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.faces.application.FacesMessage;
@@ -15,13 +24,8 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.io.Serializable;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.file.UploadedFile;
 
 @Named("eventCrudBean")
 @ViewScoped
@@ -31,6 +35,8 @@ public class EventCrudBean implements Serializable {
   
     private static final String API_BASE = "http://localhost:8080/EventEase/api/admin/"; 
 
+    private static final String UPLOAD_DIR = "D:/ICT/Sem1/102 - Java EE/EventEase/uploads/banners/";
+    
     private Client client;
     private List<Events> events;
     private Events current;
@@ -39,11 +45,80 @@ public class EventCrudBean implements Serializable {
     // helper fields for posting path-parameters create endpoint
     private Integer venueId;
     private Integer categoryId;
-
+    private String uploadedFileName;
+    
     @PostConstruct
     public void init() {
         client = ClientBuilder.newClient();
         loadAll();
+        
+        // Creating upload directory if it doesn't exists
+        File uploadDir = new File(UPLOAD_DIR);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+            System.out.println("Created upload directory: " + UPLOAD_DIR);
+        }
+    }
+    
+    // File upload handler    
+    public void handleFileUpload(FileUploadEvent event) {
+        System.out.println("========== FILE UPLOAD CALLED ==========");
+        try {
+            UploadedFile file = event.getFile();
+
+            System.out.println("File received: " + (file != null ? file.getFileName() : "NULL"));
+            System.out.println("File size: " + (file != null ? file.getSize() : 0));
+            System.out.println("Current object: " + (current != null ? "EXISTS" : "NULL"));
+
+            if (file != null && file.getSize() > 0) {
+                // Generate unique filename to avoid conflicts
+                String originalFileName = file.getFileName();
+                String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
+
+                // Save file to disk using File and FileOutputStream
+                File uploadFile = new File(UPLOAD_DIR + uniqueFileName);
+
+                // Create parent directories if they don't exist
+                uploadFile.getParentFile().mkdirs();
+
+                // Write the file using InputStream and FileOutputStream
+                try (InputStream input = file.getInputStream(); FileOutputStream output = new FileOutputStream(uploadFile)) {
+
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = input.read(buffer)) != -1) {
+                        output.write(buffer, 0, bytesRead);
+                    }
+                }
+
+                // Store the filename (or relative path) to be saved in database
+                uploadedFileName = "uploads/banners/" + uniqueFileName;
+
+                System.out.println("Uploaded filename set to: " + uploadedFileName);
+
+                // Update current event's banner
+                if (current != null) {
+                    current.setbannerImg(uploadedFileName);
+                    System.out.println("Current.bannerImg set to: " + current.getbannerImg());
+                } else {
+                    System.out.println("ERROR: Current is NULL, cannot set banner image");
+                }
+
+                facesInfo("Image uploaded successfully: " + originalFileName);
+                System.out.println("File uploaded: " + uploadFile.getAbsolutePath());
+                System.out.println("Stored path: " + uploadedFileName);
+
+            } else {
+                facesError("No file selected or file is empty");
+                System.out.println("No file or empty file");
+            }
+
+        } catch (Exception e) {
+            facesError("Error uploading file: " + e.getMessage());
+            e.printStackTrace();
+        }
+        System.out.println("========== FILE UPLOAD FINISHED ==========");
     }
 
     private void loadAll() {
@@ -76,13 +151,29 @@ public class EventCrudBean implements Serializable {
         current.setstatus("ACTIVE");
         venueId = null;
         categoryId = null;
+        uploadedFileName = null;
     }
 
     public void prepareEdit(Events evt) {
+        System.out.println("========== PREPARE EDIT ==========");
+        System.out.println("Editing event: " + evt.geteId() + " - " + evt.geteName());
+
         this.current = evt;
-        // if you want numeric IDs for venue/category:
-        if (evt.getvId() != null) venueId = evt.getvId().getvId();
-        if (evt.getcId() != null) categoryId = evt.getcId().getcId();
+        uploadedFileName = null; // will keep existing image if no new upload
+
+        if (evt.getvId() != null) {
+            venueId = evt.getvId().getvId();
+            System.out.println("Venue ID set to: " + venueId);
+        } else {
+            venueId = null;
+        }
+
+        if (evt.getcId() != null) {
+            categoryId = evt.getcId().getcId();
+            System.out.println("Category ID set to: " + categoryId);
+        } else {
+            categoryId = null;
+        }
     }
 
     public void save() {
@@ -96,6 +187,7 @@ public class EventCrudBean implements Serializable {
 
         System.out.println("Event ID: " + current.geteId());
         System.out.println("Event Name: " + current.geteName());
+        System.out.println("Banner Image: " + current.getbannerImg());  // <-- ADD THIS
         System.out.println("Venue ID: " + venueId);
         System.out.println("Category ID: " + categoryId);
 
@@ -103,7 +195,6 @@ public class EventCrudBean implements Serializable {
             if (current.geteId() == null) {
                 System.out.println("========== CREATING NEW EVENT ==========");
 
-                // Create form data
                 Form form = new Form();
                 form.param("eName", safe(current.geteName()));
                 form.param("description", safe(current.getdescription()));
@@ -116,6 +207,8 @@ public class EventCrudBean implements Serializable {
                 form.param("maxCapacity", current.getmaxCapacity() != null ? current.getmaxCapacity().toString() : "0");
                 form.param("bannerImg", safe(current.getbannerImg()));
                 form.param("status", safe(current.getstatus()));
+
+                System.out.println("Form bannerImg param: " + safe(current.getbannerImg()));  // <-- ADD THIS
 
                 WebTarget target = client.target(API_BASE).path("event/create");
                 System.out.println("Calling: " + target.getUri());
@@ -178,7 +271,6 @@ public class EventCrudBean implements Serializable {
                 }
             }
 
-            // reload and close
             loadAll();
 
         } catch (Exception ex) {
@@ -279,5 +371,13 @@ public class EventCrudBean implements Serializable {
 
     public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
+    }
+    
+    public String getUploadedFileName() {
+        return uploadedFileName;
+    }
+
+    public void setUploadedFileName(String uploadedFileName) {
+        this.uploadedFileName = uploadedFileName;
     }
 }
