@@ -7,6 +7,7 @@ jwtrest\TokenProvider.class
 eventease\resources\rest\admin\AdminResource.class
 record\KeepRecord.class
 entity\Events.class
+beans\UserReportBean.class
 beans\LoginBean.class
 client\AdminClient.class
 entity\Users.class
@@ -23,6 +24,7 @@ ejb\interfaces\admin\AdminInterface.class
 entity\Reviews.class
 entity\Categories.class
 filter\NoCacheFilter.class
+client\UserClient.class
 config\Project.class
 entity\CouponUsage.class
 entity\Tickets.class

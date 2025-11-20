@@ -60,7 +60,7 @@
     <login-config>
         <auth-method>FORM</auth-method>
         <form-login-config>
-            <form-login-page>/login.xhtml</form-login-page>
+            <form-login-page>/Login.jsf</form-login-page>
             <form-error-page>/Forbidden.jsf</form-error-page>
         </form-login-config>
     </login-config>

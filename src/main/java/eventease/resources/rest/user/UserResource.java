@@ -205,7 +205,7 @@ public class UserResource {
     
     //////////////// USERS //////////////////
     @GET
-    @Path("/all") 
+    @Path("users/getAllUsers") 
 //    //@RolesAllowed({"Admin", "User"})
     public Response getAllUsers() {
         try {           

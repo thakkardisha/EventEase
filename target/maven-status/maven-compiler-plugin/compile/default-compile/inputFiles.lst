@@ -6,6 +6,7 @@ D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Users.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\jwtrest\Constants.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\jwtrest\TokenProvider.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\jwtrest\JWTCredential.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\client\UserClient.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Venues.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\config\Project.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\EventCrudBean.java
@@ -25,6 +26,7 @@ D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\ejb\interfaces\admin\AdminInte
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Bookings.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\AuditLogs.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\LoginBean.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\UserReportBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\ejb\impl\user\UserBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\CouponUsage.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\AdminDashboardBean.java
