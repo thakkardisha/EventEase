@@ -13,6 +13,9 @@ import entity.Payments;
 import entity.Reviews;
 import entity.Venues;
 import entity.Wishlists;
+import jakarta.annotation.security.DeclareRoles;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -36,7 +39,7 @@ import java.util.Date;
 import java.util.List;
 
 @Path("/admin")
-//@DeclareRoles({"Admin", "User"})
+@DeclareRoles({"Admin", "User"})
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AdminResource {
@@ -51,6 +54,7 @@ public class AdminResource {
     ////////////// EVENTS SPECIFIC /////////////
 
     @POST
+    @RolesAllowed({"Admin"})
     @Path("event/create")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response createEvent(
@@ -92,6 +96,7 @@ public class AdminResource {
     }
 
     @PUT
+    @RolesAllowed({"Admin"})
     @Path("event/{id}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
@@ -166,7 +171,7 @@ public class AdminResource {
     }
 
     @DELETE
-    //@RolesAllowed({"Admin"})
+    @RolesAllowed({"Admin"})
     @Path("event/{id}")
     public Response deleteEvent(@PathParam("id") Integer id) {
         try {
@@ -213,7 +218,7 @@ public class AdminResource {
     
     @GET
     @Path("events/getAllEvents")
-    //@PermitAll
+    @RolesAllowed({"Admin"})
     public List<Events> getAllEvents() {
         return adminBean.getAllEvents();
     }

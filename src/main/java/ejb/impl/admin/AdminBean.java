@@ -19,6 +19,9 @@ import entity.Reviews;
 import entity.Users;
 import entity.Venues;
 import entity.Wishlists;
+import jakarta.annotation.security.DeclareRoles;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.Stateless;
 import jakarta.ejb.Schedule;
 import jakarta.persistence.EntityManager;
@@ -39,7 +42,7 @@ import utils.EntityMergeUtil;
  *
  * @author HP
  */
-//@DeclareRoles({"Admin", "User"})
+@DeclareRoles({"Admin", "User"})
 @Stateless
 public class AdminBean implements AdminInterface{
 
@@ -49,7 +52,7 @@ public class AdminBean implements AdminInterface{
     ////////////////////// EVENTS SPECIFIC ///////////////////////   
     // Basic CRUD
     @Override
-    //@RolesAllowed({"Admin"})
+    @RolesAllowed({"Admin"})
     public void createEvent(String eName, String description, LocalDate eventDate,
             LocalTime startTime, LocalTime endTime, BigDecimal unitPrice, Integer vId,
             Integer cId, Integer maxCapacity, String bannerImg, String status) {
@@ -88,7 +91,7 @@ public class AdminBean implements AdminInterface{
     }
 
     @Override
-    //@RolesAllowed({"Admin"})
+    @RolesAllowed({"Admin"})
     public void updateEvent(Events updatedEvent) {
         Events existingEvent = em.find(Events.class, updatedEvent.geteId());
 
@@ -102,7 +105,7 @@ public class AdminBean implements AdminInterface{
     }
 
     @Override
-    //@RolesAllowed({"Admin"})
+    @RolesAllowed({"Admin"})
     public void deleteEvent(Integer eventId) {
         Events event = getEventDetails(eventId);
         if (event != null) {
@@ -171,7 +174,7 @@ public class AdminBean implements AdminInterface{
 //    }
 
     @Override
-    //@PermitAll
+    @RolesAllowed({"Admin"})
     public List<Events> getAllEvents() {
         return em.createNamedQuery("Events.findAll", Events.class).getResultList();
     }

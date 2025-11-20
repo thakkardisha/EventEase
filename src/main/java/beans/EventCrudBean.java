@@ -8,14 +8,13 @@ import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -26,10 +25,16 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
+import record.KeepRecord;
+import jwtrest.Constants;
+import jakarta.ws.rs.core.GenericType;
 
 @Named("eventCrudBean")
 @ViewScoped
 public class EventCrudBean implements Serializable {
+    
+    @Inject
+    private KeepRecord keepRecord;
 
     private static final long serialVersionUID = 1L;
   
@@ -121,25 +126,48 @@ public class EventCrudBean implements Serializable {
         System.out.println("========== FILE UPLOAD FINISHED ==========");
     }
 
+    // In EventCrudBean.java
     private void loadAll() {
         try {
-            WebTarget target = client.target(API_BASE).path("events/getAllEvents");
-            System.out.println("Calling: " + target.getUri());
+            // 1. Get the JWT token from the KeepRecord bean
+            String adminToken = keepRecord.getToken();
 
-            Events[] arr = target.request(MediaType.APPLICATION_JSON).get(Events[].class);
-
-            if (arr != null) {
-                System.out.println("EVENT COUNT = " + arr.length);
-            } else {
-                System.out.println("ARR IS NULL");
+            if (adminToken == null || adminToken.isEmpty()) {
+                System.err.println("REST ERROR: Admin Token not found. Cannot fetch secured resources.");
+                facesError("Authentication token missing. Please ensure you are logged in.");
+                this.events = List.of(); // Empty list to prevent display
+                return;
             }
 
-            events = Arrays.asList(arr);
-            System.out.println("LIST SIZE = " + events.size());
+            WebTarget target = client.target(API_BASE).path("events/getAllEvents");
+            System.out.println("REST: Calling getAllEvents endpoint with JWT...");
 
-        } catch (Exception ex) {
-            facesError("Error loading events: " + ex.getMessage());
-            ex.printStackTrace();
+            // 2. Build the request and add the Authorization header
+            Response r = target
+                    .request(MediaType.APPLICATION_JSON)
+                    // Use Constants to construct the "Authorization: Bearer <token>" header
+                    .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + adminToken)
+                    .get();
+
+            // 3. Check the response status
+            if (r.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+                // Success (200 OK)
+                this.events = r.readEntity(new GenericType<List<Events>>() {
+                });
+                System.out.println("REST: Fetched " + events.size() + " events successfully.");
+            } else {
+                // Failure (e.g., 401 Unauthorized or 403 Forbidden)
+                String responseBody = r.readEntity(String.class);
+                String errorMsg = "Failed to fetch events. Status: " + r.getStatus();
+                System.err.println("REST AUTHORIZATION ERROR: " + errorMsg + " | Detail: " + responseBody);
+                facesError(errorMsg + ". Check server logs for details.");
+                this.events = List.of();
+            }
+        } catch (Exception e) {
+            System.err.println("Exception during event fetching: " + e.getMessage());
+            facesError("An unexpected error occurred while loading events.");
+            e.printStackTrace();
+            this.events = List.of();
         }
     }
 
@@ -184,6 +212,12 @@ public class EventCrudBean implements Serializable {
             facesError("Nothing to save.");
             return;
         }
+        
+        String adminToken = keepRecord.getToken();
+        if (adminToken == null || adminToken.isEmpty()) {
+            facesError("Authentication token missing. Please log in again.");
+            return;
+        }
 
         System.out.println("Event ID: " + current.geteId());
         System.out.println("Event Name: " + current.geteName());
@@ -214,6 +248,7 @@ public class EventCrudBean implements Serializable {
                 System.out.println("Calling: " + target.getUri());
 
                 Response r = target.request(MediaType.APPLICATION_JSON)
+                        .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + adminToken)
                         .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 
                 int status_code = r.getStatus();
@@ -254,6 +289,7 @@ public class EventCrudBean implements Serializable {
                 System.out.println("Form params: " + form.asMap());
 
                 Response r = target.request(MediaType.APPLICATION_JSON)
+                        .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + adminToken)
                         .put(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 
                 int status_code = r.getStatus();
@@ -298,8 +334,11 @@ public class EventCrudBean implements Serializable {
             return;
         }
         try {
+            String adminToken = keepRecord.getToken();
             WebTarget target = client.target(API_BASE).path("event").path(String.valueOf(id));
-            Response r = target.request().delete();
+            Response r = target.request()
+                    .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + adminToken)
+                    .delete();
             if (r.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
                 facesInfo("Event deleted");
                 loadAll();
