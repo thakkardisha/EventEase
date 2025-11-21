@@ -125,8 +125,7 @@ public class EventCrudBean implements Serializable {
         }
         System.out.println("========== FILE UPLOAD FINISHED ==========");
     }
-
-    // In EventCrudBean.java
+   
     private void loadAll() {
         try {
             // 1. Get the JWT token from the KeepRecord bean
