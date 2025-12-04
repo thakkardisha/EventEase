@@ -363,27 +363,31 @@ public class AdminResource {
     //////////////////////// VENUES /////////////////////
     /** Insert venues */
     @POST
-    //@RolesAllowed({"Admin"})
-    @Path("venue/addvenue/{vName}/{vAddress}/{vCity}/{vState}/{vCapacity}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"Admin"})
+    @Path("venue/addvenue")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response addVenue(
-            @PathParam("vName") String vName,
-            @PathParam("vAddress") String vAddress,
-            @PathParam("vCity") String vCity,
-            @PathParam("vState") String vState,
-            @PathParam("vCapacity") Integer vCapacity) {
+            @FormParam("vName") String vName,
+            @FormParam("vAddress") String vAddress,
+            @FormParam("vCity") String vCity,
+            @FormParam("vState") String vState,
+            @FormParam("vCapacity") Integer vCapacity) {
 
         try {
+            System.out.println("REST: Adding venue: " + vName);
+
             adminBean.addVenue(vName, vAddress, vCity, vState, vCapacity);
-            return Response.status(Response.Status.CREATED)
-                    .entity("Venue added successfully: " + vName)
-                    .build();
+
+            return Response.ok("Venue added successfully: " + vName).build();
+
         } catch (Exception e) {
+            e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Error: " + e.getMessage())
                     .build();
         }
     }
+
 
     /**
      * PUT /venues
@@ -612,27 +616,29 @@ public class AdminResource {
     ////////////////// CATEGORIES ////////////////////////
     // Add a new category
     @POST
-    //@RolesAllowed({"Admin"})
-    @Path("category/addcategory/{cName}/{cDescription}/{cImg}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"Admin"})
+    @Path("category/addcategory")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response addCategory(
-            @PathParam("cName") String cName,
-            @PathParam("cDescription") String cDescription,
-            @PathParam("cImg") String cImg) {
+            @FormParam("cName") String cName,
+            @FormParam("cDescription") String cDescription,
+            @FormParam("cImg") String cImg) {
 
         try {
+            System.out.println("REST: Adding category: " + cName);
+
             adminBean.addCategory(cName, cDescription, cImg);
 
-            return Response.status(Response.Status.CREATED)
-                    .entity("Category added successfully.")
-                    .build();
+            return Response.ok("Category added successfully.").build();
 
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error" + e.getMessage())
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: " + e.getMessage())
                     .build();
         }
     }
+
 
     // Update a category
     @PUT
@@ -756,36 +762,46 @@ public class AdminResource {
     /////////////////// COUPONS /////////////////////////
     // ---------------- CRUD ----------------
     @POST
-    //@RolesAllowed({"Admin"})
-    @Path("coupons/createcoupon/{cCode}/{discountType}/{discountValue}/{maxUses}/{validFrom}/{validTo}/{status}/{isSingleUse}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"Admin"})
+    @Path("coupons/createcoupon")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response createCoupon(
-            @PathParam("cCode") String cCode,
-            @PathParam("discountType") String discountType,
-            @PathParam("discountValue") long discountValue,
-            @PathParam("maxUses") Integer maxUses,
-            @PathParam("validFrom") String validFromStr,
-            @PathParam("validTo") String validToStr,
-            @PathParam("status") String status,
-            @PathParam("isSingleUse") boolean isSingleUse) {
+            @FormParam("cCode") String cCode,
+            @FormParam("discountType") String discountType,
+            @FormParam("discountValue") long discountValue,
+            @FormParam("maxUses") Integer maxUses,
+            @FormParam("validFrom") String validFromStr,
+            @FormParam("validTo") String validToStr,
+            @FormParam("status") String status,
+            @FormParam("isSingleUse") boolean isSingleUse) {
 
         try {
-            java.time.LocalDate validFrom = java.time.LocalDate.parse(validFromStr);
-            java.time.LocalDate validTo = java.time.LocalDate.parse(validToStr);
+            System.out.println("REST: Creating coupon: " + cCode);
 
-            adminBean.createCoupon(cCode, discountType, discountValue, maxUses,
-                    validFrom, validTo, status, isSingleUse);
+            LocalDate validFrom = LocalDate.parse(validFromStr);
+            LocalDate validTo = LocalDate.parse(validToStr);
 
-            return Response.status(Response.Status.CREATED)
-                    .entity("Coupon created successfully.")
-                    .build();
+            adminBean.createCoupon(
+                    cCode,
+                    discountType,
+                    discountValue,
+                    maxUses,
+                    validFrom,
+                    validTo,
+                    status,
+                    isSingleUse
+            );
+
+            return Response.ok("Coupon created successfully.").build();
 
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error" + e.getMessage())
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: " + e.getMessage())
                     .build();
         }
     }
+
 
     @PUT
     //@RolesAllowed({"Admin"})
@@ -1028,26 +1044,30 @@ public class AdminResource {
     }
 
     @POST
-    //@RolesAllowed({"Admin"})
-    @Path("artist/addartist/{aName}/{aBio}/{aImgUrl}/{aType}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"Admin"})
+    @Path("artist/addartist")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response addArtist(
-            @PathParam("aName") String aName,
-            @PathParam("aBio") String aBio,
-            @PathParam("aImgUrl") String aImgUrl,
-            @PathParam("aType") String aType) {
+            @FormParam("aName") String aName,
+            @FormParam("aBio") String aBio,
+            @FormParam("aImgUrl") String aImgUrl,
+            @FormParam("aType") String aType) {
 
         try {
+            System.out.println("REST: Adding artist: " + aName);
+
             adminBean.addArtist(aName, aBio, aImgUrl, aType);
-            return Response.status(Response.Status.CREATED)
-                    .entity("Artist added successfully.")
-                    .build();
+
+            return Response.ok("Artist added successfully.").build();
+
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("error:" + e.getMessage())
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: " + e.getMessage())
                     .build();
         }
     }
+
 
     @PUT
     //@RolesAllowed({"Admin"})
@@ -1171,25 +1191,29 @@ public class AdminResource {
     ////////////// ARTIST SOCIAL LINKS ////////////
     // Add a new social link
     @POST
-    //@RolesAllowed({"Admin"})
-    @Path("socialLink/addsociallink/{aId}/{platform}/{link}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"Admin"})
+    @Path("socialLink/addsociallink")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response addSocialLink(
-            @PathParam("aId") Integer aId,
-            @PathParam("platform") String platform,
-            @PathParam("link") String link) {
+            @FormParam("aId") Integer aId,
+            @FormParam("platform") String platform,
+            @FormParam("link") String link) {
 
         try {
+            System.out.println("REST: Adding social link for Artist ID: " + aId);
+
             adminBean.addSocialLink(aId, platform, link);
-            return Response.status(Response.Status.CREATED)
-                    .entity("Social link added successfully.")
-                    .build();
+
+            return Response.ok("Social link added successfully.").build();
+
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error" + e.getMessage())
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: " + e.getMessage())
                     .build();
         }
     }
+
 
     @PUT
     //@RolesAllowed({"Admin"})

@@ -15,9 +15,9 @@ jwtrest\JWTCredential.class
 entity\UserGroupMaster.class
 utils\EntityMergeUtil.class
 entity\Venues.class
+beans\AdminDashboardBean$1.class
 ejb\impl\admin\AdminBean.class
 jwtrest\Constants.class
-beans\EventCrudBean.class
 servlets\ImageServlet.class
 ejb\impl\user\UserBean.class
 ejb\interfaces\admin\AdminInterface.class
@@ -38,5 +38,4 @@ entity\EventImages.class
 ejb\interfaces\user\UserInterface.class
 entity\Wishlists.class
 beans\RegisterBean.class
-beans\EventCrudBean$1.class
 entity\AuditLogs.class

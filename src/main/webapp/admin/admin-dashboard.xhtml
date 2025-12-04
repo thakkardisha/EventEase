@@ -25,19 +25,19 @@
             <h:graphicImage library="images" name="EventEase.png" styleClass="logo-small"/>
 
             <nav>
-                <p:commandLink actionListener="#{adminDashboardBean.loadPage('analytics')}"
+                <p:commandLink actionListener="#{adminCDI.loadPage('analytics')}"
                                update="dashboard-content"
                                styleClass="nav-item options">
                     <i class="fas fa-chart-line"></i> Analytics Dashboard
                 </p:commandLink>
 
-                <p:commandLink actionListener="#{adminDashboardBean.loadPage('crud-management')}"
+                <p:commandLink actionListener="#{adminCDI.loadPage('crud-management')}"
                                update="dashboard-content"
                                styleClass="nav-item options">
                     <i class="fas fa-database"></i> CRUD Management
                 </p:commandLink>
 
-                <p:commandLink actionListener="#{adminDashboardBean.loadPage('user-report')}"
+                <p:commandLink actionListener="#{adminCDI.loadPage('user-report')}"
                                update="dashboard-content"
                                styleClass="nav-item options">
                     <i class="fas fa-users"></i> User Reports
@@ -63,7 +63,7 @@
 
             <!-- Dynamic Content Loader -->
             <h:panelGroup id="dashboard-content">
-                <ui:include src="#{adminDashboardBean.activePage}" />
+                <ui:include src="#{adminCDI.activePage}" />
             </h:panelGroup>
         </main>
     </div>
