@@ -25,6 +25,7 @@ entity\Reviews.class
 entity\Categories.class
 filter\NoCacheFilter.class
 client\UserClient.class
+beans\GenericCrudBean.class
 config\Project.class
 entity\CouponUsage.class
 entity\Tickets.class

@@ -27,6 +27,7 @@ D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Bookings.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\AuditLogs.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\LoginBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\UserReportBean.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\GenericCrudBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\ejb\impl\user\UserBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\CouponUsage.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\AdminDashboardBean.java

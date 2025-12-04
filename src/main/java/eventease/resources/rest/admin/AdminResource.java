@@ -14,7 +14,6 @@ import entity.Reviews;
 import entity.Venues;
 import entity.Wishlists;
 import jakarta.annotation.security.DeclareRoles;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
 import jakarta.persistence.EntityManager;
@@ -35,8 +34,13 @@ import jakarta.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Path("/admin")
 @DeclareRoles({"Admin", "User"})
@@ -842,8 +846,9 @@ public class AdminResource {
     }
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     //@PermitAll
-    @Path("coupons/getAllCoupons/{id}")
+    @Path("coupons/getAllCoupons")
     public List<Coupons> getAllCoupons() {
         return adminBean.getAllCoupons();
     }
@@ -1024,8 +1029,9 @@ public class AdminResource {
     
     //////////////// ARTISTS /////////////////////
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     //@PermitAll
-    @Path("artist/getAllArtists/{id}")
+    @Path("artist/getAllArtists")
     public List<Artists> getAllArtists() {
         return adminBean.getAllArtists();
     }
@@ -1656,5 +1662,155 @@ public class AdminResource {
         }
         adminBean.deletePayment(id);
         return Response.noContent().build();
+    }
+    
+    
+    ////////////////// METADATA /////////////////////  
+    
+    // Add these methods to your AdminResource class
+
+@GET
+    @RolesAllowed({"Admin"})
+    @Path("metadata/tables")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllTableNames() {
+        try {
+            List<String> tables = new ArrayList<>();
+            tables.add("Events");
+            tables.add("Venues");
+            tables.add("Categories");
+            tables.add("Coupons");
+            tables.add("Artists");
+            tables.add("ArtistSocialLinks");
+            tables.add("Reviews");
+            tables.add("Interests");
+            tables.add("Wishlists");
+            tables.add("Bookings");
+            tables.add("Payments");
+            tables.add("EventImages");
+
+            return Response.ok(tables).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @GET
+    @RolesAllowed({"Admin"})
+    @Path("metadata/columns/{tableName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTableColumns(@PathParam("tableName") String tableName) {
+        try {
+            Map<String, String> columns = new LinkedHashMap<>();
+
+            switch (tableName.toLowerCase()) {
+                case "events":
+                    columns.put("eId", "Integer");
+                    columns.put("eName", "String");
+                    columns.put("description", "String");
+                    columns.put("eventDate", "LocalDate");
+                    columns.put("startTime", "LocalTime");
+                    columns.put("endTime", "LocalTime");
+                    columns.put("unitPrice", "BigDecimal");
+                    columns.put("vId", "Integer");
+                    columns.put("cId", "Integer");
+                    columns.put("maxCapacity", "Integer");
+                    columns.put("bannerImg", "String");
+                    columns.put("status", "String");
+                    break;
+
+                case "venues":
+                    columns.put("vId", "Integer");
+                    columns.put("vName", "String");
+                    columns.put("vAddress", "String");
+                    columns.put("vCity", "String");
+                    columns.put("vState", "String");
+                    columns.put("vCapacity", "Integer");
+                    break;
+
+                case "categories":
+                    columns.put("cId", "Integer");
+                    columns.put("cName", "String");
+                    columns.put("cDescription", "String");
+                    columns.put("cImg", "String");
+                    break;
+
+                case "coupons":
+                    columns.put("cId", "Integer");
+                    columns.put("cCode", "String");
+                    columns.put("discountType", "String");
+                    columns.put("discountValue", "Long");
+                    columns.put("maxUses", "Integer");
+                    columns.put("validFrom", "LocalDate");
+                    columns.put("validTo", "LocalDate");
+                    columns.put("status", "String");
+                    columns.put("isSingleUse", "Boolean");
+                    break;
+
+                case "artists":
+                    columns.put("aId", "Integer");
+                    columns.put("aName", "String");
+                    columns.put("aBio", "String");
+                    columns.put("aImgUrl", "String");
+                    columns.put("aType", "String");
+                    break;
+
+                case "reviews":
+                    columns.put("rId", "Integer");
+                    columns.put("rating", "Integer");
+                    columns.put("comment", "String");
+                    columns.put("reviewDate", "Date");
+                    break;
+
+                // Add other tables as needed
+                default:
+                    return Response.status(Response.Status.NOT_FOUND)
+                            .entity("Table not found: " + tableName)
+                            .build();
+            }
+
+            return Response.ok(columns).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @GET
+    @RolesAllowed({"Admin"})
+    @Path("metadata/primaryKey/{tableName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPrimaryKey(@PathParam("tableName") String tableName) {
+        try {
+            Map<String, String> pkMap = new HashMap<>();
+            pkMap.put("events", "eId");
+            pkMap.put("venues", "vId");
+            pkMap.put("categories", "cId");
+            pkMap.put("coupons", "cId");
+            pkMap.put("artists", "aId");
+            pkMap.put("reviews", "rId");
+            pkMap.put("bookings", "bId");
+            pkMap.put("payments", "pId");
+            pkMap.put("interests", "iId");
+            pkMap.put("wishlists", "wId");
+            pkMap.put("eventimages", "imgId");
+            pkMap.put("artistsociallinks", "linkId");
+
+            String pk = pkMap.get(tableName.toLowerCase());
+            if (pk == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Primary key not found for table: " + tableName)
+                        .build();
+            }
+
+            return Response.ok(Collections.singletonMap("primaryKey", pk)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error: " + e.getMessage())
+                    .build();
+        }
     }
 }
