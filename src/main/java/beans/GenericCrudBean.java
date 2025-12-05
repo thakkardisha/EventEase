@@ -241,27 +241,28 @@ public class GenericCrudBean implements Serializable {
                 columns.add("eventDate");
                 columns.add("startTime");
                 columns.add("endTime");
+                columns.add("vName");  // Venue name instead of vId object
+                columns.add("cName");  // Category name instead of cId object
                 columns.add("unitPrice");
                 columns.add("maxCapacity");
-                columns.add("bannerImg");
                 columns.add("status");
-                // Skip relationship fields for now (vId, cId shown as objects)
+                // Skip bannerImg for display
                 break;
 
             case "venues":
                 columns.add("vId");
                 columns.add("vName");
-                columns.add("vAddress");
                 columns.add("vCity");
                 columns.add("vState");
                 columns.add("vCapacity");
+                // Skip vAddress for brevity
                 break;
 
             case "categories":
                 columns.add("cId");
                 columns.add("cName");
                 columns.add("cDescription");
-                columns.add("cImg");
+                // Skip cImg
                 break;
 
             case "coupons":
@@ -274,19 +275,19 @@ public class GenericCrudBean implements Serializable {
                 columns.add("validFrom");
                 columns.add("validTo");
                 columns.add("status");
-                columns.add("isSingleUse");
                 break;
 
             case "artists":
                 columns.add("aId");
                 columns.add("aName");
-                columns.add("aBio");
-                columns.add("aImgUrl");
                 columns.add("aType");
+                columns.add("aBio");
+                // Skip aImgUrl
                 break;
 
             case "socialLinks":
                 columns.add("linkId");
+                columns.add("aName"); // Artist name
                 columns.add("platform");
                 columns.add("link");
                 break;
@@ -296,6 +297,7 @@ public class GenericCrudBean implements Serializable {
                 columns.add("rating");
                 columns.add("comment");
                 columns.add("reviewDate");
+                // Add event/user names if available
                 break;
 
             case "bookings":
@@ -336,6 +338,69 @@ public class GenericCrudBean implements Serializable {
         }
 
         return columns;
+    }
+
+    /**
+     * Get user-friendly column headers
+     */
+    public String getColumnHeader(String columnName) {
+        Map<String, String> headers = new HashMap<>();
+
+        // Common mappings
+        headers.put("eId", "Event ID");
+        headers.put("eName", "Event Name");
+        headers.put("eventDate", "Date");
+        headers.put("startTime", "Start Time");
+        headers.put("endTime", "End Time");
+        headers.put("unitPrice", "Price");
+        headers.put("maxCapacity", "Capacity");
+        headers.put("vId", "Venue ID");
+        headers.put("vName", "Venue");
+        headers.put("vCity", "City");
+        headers.put("vState", "State");
+        headers.put("vCapacity", "Capacity");
+        headers.put("cId", "Category ID");
+        headers.put("cName", "Category");
+        headers.put("cDescription", "Description");
+        headers.put("cCode", "Coupon Code");
+        headers.put("discountType", "Type");
+        headers.put("discountValue", "Discount");
+        headers.put("maxUses", "Max Uses");
+        headers.put("currentUses", "Used");
+        headers.put("validFrom", "Valid From");
+        headers.put("validTo", "Valid To");
+        headers.put("aId", "Artist ID");
+        headers.put("aName", "Artist");
+        headers.put("aType", "Type");
+        headers.put("aBio", "Bio");
+        headers.put("linkId", "Link ID");
+        headers.put("rId", "Review ID");
+        headers.put("bId", "Booking ID");
+        headers.put("bookingDate", "Date");
+        headers.put("ticketQuantity", "Tickets");
+        headers.put("totalAmount", "Amount");
+        headers.put("bookingStatus", "Status");
+        headers.put("pId", "Payment ID");
+        headers.put("paymentDate", "Date");
+        headers.put("paymentAmount", "Amount");
+        headers.put("paymentMethod", "Method");
+        headers.put("paymentStatus", "Status");
+        headers.put("iId", "Interest ID");
+        headers.put("wId", "Wishlist ID");
+        headers.put("registeredAt", "Registered");
+        headers.put("addedAt", "Added");
+        headers.put("imgId", "Image ID");
+        headers.put("imgUrl", "Image URL");
+        headers.put("altText", "Alt Text");
+        headers.put("status", "Status");
+        headers.put("description", "Description");
+        headers.put("comment", "Comment");
+        headers.put("rating", "Rating");
+        headers.put("reviewDate", "Date");
+        headers.put("platform", "Platform");
+        headers.put("link", "Link");
+
+        return headers.getOrDefault(columnName, columnName);
     }
 
     public void prepareNew() {
@@ -429,7 +494,24 @@ public class GenericCrudBean implements Serializable {
     }
 
     private String getDeleteEndpoint(String table, Object id) {
-        return table + "/" + id;
+        Map<String, String> deletePaths = new HashMap<>();
+        deletePaths.put("events", "event/");
+        deletePaths.put("venues", "venue/");
+        deletePaths.put("categories", "category/");
+        deletePaths.put("coupons", "coupons/");
+        deletePaths.put("artists", "artist/");
+        deletePaths.put("socialLinks", "socialLink/delete/");
+        deletePaths.put("reviews", "reviews/");
+        deletePaths.put("payments", "payment/");
+        deletePaths.put("eventImages", "eventImages/");
+
+        String basePath = deletePaths.get(table);
+        if (basePath == null) {
+            System.err.println("No delete endpoint configured for table: " + table);
+            return table + "/" + id; // fallback
+        }
+
+        return basePath + id;
     }
 
     // Public method to get primary key column name
