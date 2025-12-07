@@ -397,7 +397,7 @@ public class AdminResource {
      * PUT /venues
      */
     @PUT
-    @Path("venue/updateVenue")
+    @Path("venue/{id}")
     //@RolesAllowed({"Admin"})
     public Response updateVenue(Venues venue) {
         try {
@@ -648,7 +648,7 @@ public class AdminResource {
     // Update a category
     @PUT
     //@RolesAllowed({"Admin"})
-    @Path("category/updateCategory/{id}")
+    @Path("category/{id}")
     public Response updateCategory(@PathParam("id") Integer id, Categories category) {
         Categories existing = adminBean.getCategoryById(id);
         if (existing == null) {
@@ -809,7 +809,7 @@ public class AdminResource {
 
 
     @PUT
-    //@RolesAllowed({"Admin"})
+    @RolesAllowed({"Admin"})
     @Path("coupons/{id}")
     public Response updateCoupon(@PathParam("id") Integer id, Coupons coupon) {
         Coupons existing = adminBean.getCouponById(id);
@@ -1077,7 +1077,7 @@ public class AdminResource {
 
 
     @PUT
-    //@RolesAllowed({"Admin"})
+    @RolesAllowed({"Admin"})
     @Path("artist/{id}")
     public Response updateArtist(@PathParam("id") Integer id, Artists updatedArtist) {
         // 1. Retrieve the existing entity (which may be a detached copy)

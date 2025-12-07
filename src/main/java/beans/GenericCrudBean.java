@@ -398,11 +398,26 @@ public class GenericCrudBean implements Serializable {
                 String key = entry.getKey();
                 Object value = entry.getValue();
 
-                // Skip primary key and read-only fields
-                if (key.equals(getPrimaryKeyColumn())
-                        || key.equals("vName")
-                        || key.equals("cName")
-                        || key.equals("aName")) {
+                // Skip primary key
+                if (key.equals(getPrimaryKeyColumn())) {
+                    continue;
+                }
+
+                // Skip derived/display-only fields for events table
+                // (vName, cName, aName are added from nested objects in events)
+                boolean isDerivedField = false;
+                if (selectedTable.equals("events")) {
+                    if (key.equals("vName") || key.equals("cName")) {
+                        isDerivedField = true;
+                    }
+                } else if (selectedTable.equals("socialLinks")) {
+                    if (key.equals("aName")) {
+                        isDerivedField = true;
+                    }
+                }
+
+                if (isDerivedField) {
+                    System.out.println("  Skipping derived field: " + key);
                     continue;
                 }
 
@@ -450,30 +465,90 @@ public class GenericCrudBean implements Serializable {
 
             System.out.println("Updating via: " + endpoint);
 
-            Form form = new Form();
-            for (Map.Entry<String, Object> entry : currentRecord.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
+            // Check if this table needs JSON body instead of form data
+            boolean needsJsonBody = selectedTable.equals("venues") 
+                    || selectedTable.equals("categories")
+                    || selectedTable.equals("coupons")
+                    || selectedTable.equals("artists")
+                    || selectedTable.equals("reviews")
+                    || selectedTable.equals("artistsociallinks");
 
-                // Skip read-only display fields
-                if (key.equals("vName") || key.equals("cName") || key.equals("aName")) {
-                    continue;
+            Response r;
+            if (needsJsonBody) {
+                // Build JSON object for venues
+                Map<String, Object> jsonBody = new LinkedHashMap<>();
+
+                for (Map.Entry<String, Object> entry : currentRecord.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+
+                    // Skip derived fields
+                    boolean isDerivedField = false;
+                    if (selectedTable.equals("events")) {
+                        if (key.equals("vName") || key.equals("cName")) {
+                            isDerivedField = true;
+                        }
+                    } else if (selectedTable.equals("socialLinks")) {
+                        if (key.equals("aName")) {
+                            isDerivedField = true;
+                        }
+                    }
+
+                    if (isDerivedField) {
+                        System.out.println("  Skipping derived field: " + key);
+                        continue;
+                    }
+
+                    if (value != null && !value.toString().trim().isEmpty()) {
+                        String strValue = value.toString().trim();
+                        jsonBody.put(key, strValue);
+                        System.out.println("  JSON field: " + key + " = " + strValue);
+                    }
                 }
 
-                // Include all non-null values (including primary key for updates)
-                if (value != null && !value.toString().trim().isEmpty()) {
-                    String strValue = value.toString().trim();
-                    form.param(key, strValue);
-                    System.out.println("  Param: " + key + " = " + strValue);
-                } else {
-                    System.out.println("  Skipping empty param: " + key);
+                WebTarget target = client.target(API_BASE).path(endpoint);
+                r = target.request(MediaType.APPLICATION_JSON)
+                        .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + token)
+                        .put(Entity.entity(jsonBody, MediaType.APPLICATION_JSON));
+            } else {
+                // Use form data for other tables
+                Form form = new Form();
+                for (Map.Entry<String, Object> entry : currentRecord.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+
+                    // Skip derived/display-only fields for events table
+                    boolean isDerivedField = false;
+                    if (selectedTable.equals("events")) {
+                        if (key.equals("vName") || key.equals("cName")) {
+                            isDerivedField = true;
+                        }
+                    } else if (selectedTable.equals("socialLinks")) {
+                        if (key.equals("aName")) {
+                            isDerivedField = true;
+                        }
+                    }
+
+                    if (isDerivedField) {
+                        System.out.println("  Skipping derived field: " + key);
+                        continue;
+                    }
+
+                    // Include all non-null values (including primary key for updates)
+                    if (value != null && !value.toString().trim().isEmpty()) {
+                        String strValue = value.toString().trim();
+                        form.param(key, strValue);
+                        System.out.println("  Param: " + key + " = " + strValue);
+                    } else {
+                        System.out.println("  Skipping empty param: " + key);
+                    }
                 }
+
+                WebTarget target = client.target(API_BASE).path(endpoint);
+                r = target.request(MediaType.APPLICATION_JSON)
+                        .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + token)
+                        .put(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
             }
-
-            WebTarget target = client.target(API_BASE).path(endpoint);
-            Response r = target.request(MediaType.APPLICATION_JSON)
-                    .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + token)
-                    .put(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 
             System.out.println("Response status: " + r.getStatus());
 
@@ -506,6 +581,7 @@ public class GenericCrudBean implements Serializable {
     private String getUpdateEndpoint(String table, Object id) {
         Map<String, String> updatePaths = new HashMap<>();
         updatePaths.put("events", "event/");
+        updatePaths.put("venues", "venue/");
         updatePaths.put("categories", "category/");
         updatePaths.put("coupons", "coupons/");
         updatePaths.put("artists", "artist/");
