@@ -7,9 +7,19 @@
 
     <h:head>
         <title>Generic CRUD Management</title>
-        <h:outputStylesheet library="primefaces" name="primefaces.css" />
-        <h:outputScript library="primefaces" name="jquery/jquery.js" target="head" />
-        <h:outputScript library="primefaces" name="primefaces.js" target="head" />
+        <style>
+            .label-col {
+                width: 30%;
+                padding: 10px;
+                text-align: right;
+                vertical-align: middle;
+                font-weight: bold;
+            }
+            .value-col {
+                width: 70%;
+                padding: 10px;
+            }
+        </style>
     </h:head>
 
     <h:body>
@@ -20,149 +30,201 @@
 
         <h:form id="mainForm">
 
-<!--            <p:messages id="msgs" showDetail="true" autoUpdate="false" />-->
+            <p:messages id="msgs" showDetail="true" closable="true" />
 
             <h2 style="margin-bottom: 12px;">Database CRUD Management</h2>
 
             <!-- TABLE SELECTOR DROPDOWN -->
             <p:panelGrid columns="2" style="margin-bottom: 20px;">
                 <h:outputLabel value="Select Table:" for="tableDropdown" />
-                <p:selectOneMenu id="tableDropdown" 
+                <p:selectOneMenu id="tableDropdown"
                                  value="#{genericCrudCDI.selectedTable}"
                                  style="width: 300px;">
-                    <f:selectItem itemLabel="-- Select a Table --" itemValue="" noSelectionOption="true" />
-                    <f:selectItems value="#{genericCrudCDI.availableTables}" />
-                    <p:ajax event="change" 
+                    <f:selectItem itemLabel="-- Select a Table --"
+                                  itemValue=""
+                                  noSelectionOption="true" />
+                    <f:selectItems value="#{genericCrudCDI.availableTables.entrySet()}"
+                                   var="entry"
+                                   itemLabel="#{entry.key}"
+                                   itemValue="#{entry.value}" />
+                    <p:ajax event="change"
                             listener="#{genericCrudCDI.onTableSelect}"
-                            update="dataPanel addButton msgs" />
+                            update="dataPanel addButton" />
                 </p:selectOneMenu>
             </p:panelGrid>
 
             <!-- ADD BUTTON -->
-            <p:commandButton id="addButton" 
+            <p:commandButton id="addButton"
                              value="Add New Record"
                              icon="pi pi-plus"
-                             styleClass="p-mb-3"
+                             styleClass="ui-button-success"
                              actionListener="#{genericCrudCDI.prepareNew}"
-                             update="dialogForm"
+                             update=":dialogForm:recordDialogContent"
                              oncomplete="PF('recordDialog').show();"
                              disabled="#{empty genericCrudCDI.selectedTable}"
-                             style="margin-bottom: 10px;" />
+                             style="margin-bottom: 15px;" />
 
-            <!-- DATA PANEL (shown only when table is selected) -->
+            <!-- DATA PANEL -->
             <h:panelGroup id="dataPanel">
-                <p:dataTable id="dataTable" 
+
+                <p:panel rendered="#{not empty genericCrudCDI.selectedTable}" style="margin-bottom: 10px;">
+                    <strong>Debug:</strong>
+                    Table: #{genericCrudCDI.selectedTable},
+                    Records: #{genericCrudCDI.tableData.size()},
+                    Columns: #{genericCrudCDI.tableColumns.size()}
+                </p:panel>
+
+                <p:dataTable id="dataTable"
                              var="record"
                              value="#{genericCrudCDI.tableData}"
-                             paginator="true" 
+                             paginator="true"
                              rows="10"
-                             rendered="#{not empty genericCrudCDI.selectedTable and not empty genericCrudCDI.tableData}"
+                             rendered="#{not empty genericCrudCDI.selectedTable}"
                              style="margin-top:10px;"
                              emptyMessage="No records found">
 
-                    <!-- DYNAMICALLY GENERATE COLUMNS -->
-                    <p:columns value="#{genericCrudCDI.tableColumns}" 
-                               var="column" 
-                               headerText="#{column}"
-                               sortBy="#{record[column]}"
-                               filterBy="#{record[column]}">
+                    <p:columns value="#{genericCrudCDI.tableColumns}"
+                               var="column"
+                               headerText="#{genericCrudCDI.getColumnHeader(column)}"
+                               sortBy="#{record[column]}">
                         <h:outputText value="#{record[column]}" />
                     </p:columns>
 
-                    <!-- ACTIONS COLUMN -->
-                    <p:column headerText="Actions" style="width:140px;" exportable="false">
-                        <!-- EDIT -->
+                    <p:column headerText="Actions" style="width:140px; text-align: center;" exportable="false">
                         <p:commandButton icon="pi pi-pencil"
                                          title="Edit"
-                                         update="dialogForm"
+                                         actionListener="#{genericCrudCDI.prepareEdit(record)}"
+                                         update=":dialogForm:recordDialogContent"
                                          oncomplete="PF('recordDialog').show();"
-                                         styleClass="ui-button-warning"
-                                         style="margin-right: 5px;">
-                            <f:setPropertyActionListener 
-                                target="#{genericCrudCDI.currentRecord}" 
-                                value="#{record}" />
-                        </p:commandButton>
+                                         styleClass="ui-button-warning ui-button-rounded"
+                                         style="margin-right: 5px;" />
 
-                        <!-- DELETE -->
                         <p:commandButton icon="pi pi-trash"
                                          title="Delete"
                                          actionListener="#{genericCrudCDI.delete(record)}"
-                                         update="dataTable msgs"
-                                         styleClass="ui-button-danger">
-                            <p:confirm header="Confirmation" 
-                                       message="Are you sure you want to delete this record?" 
+                                         update=":mainForm:dataTable :mainForm:msgs"
+                                         styleClass="ui-button-danger ui-button-rounded">
+                            <p:confirm header="Confirmation"
+                                       message="Are you sure you want to delete this record?"
                                        icon="pi pi-exclamation-triangle" />
                         </p:commandButton>
                     </p:column>
 
                 </p:dataTable>
 
-                <h:outputText value="Please select a table from the dropdown above." 
+                <h:outputText value="Please select a table from the dropdown above to view data."
                               rendered="#{empty genericCrudCDI.selectedTable}"
-                              style="display: block; margin-top: 20px; color: #666;" />
+                              style="display: block; margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px; color: #666;" />
             </h:panelGroup>
+
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+                <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" />
+            </p:confirmDialog>
 
         </h:form>
 
-        <!-- CONFIRMATION DIALOG -->
-        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
-            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
-            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" />
-        </p:confirmDialog>
+        <!-- SEPARATE FORM FOR DIALOG -->
+        <h:form id="dialogForm">
+            <p:dialog id="recordDialog"
+                      header="#{empty genericCrudCDI.currentRecord[genericCrudCDI.primaryKeyColumn] or genericCrudCDI.currentRecord[genericCrudCDI.primaryKeyColumn] eq '' ? 'Add New' : 'Edit'} Record - #{genericCrudCDI.selectedTable}"
+                      widgetVar="recordDialog"
+                      modal="true"
+                      resizable="false"
+                      width="700"
+                      showEffect="fade"
+                      hideEffect="fade">
 
-        <!-- DYNAMIC EDIT/ADD DIALOG -->
-        <p:dialog id="recordDialog" 
-                  header="Record Details" 
-                  widgetVar="recordDialog"
-                  modal="true" 
-                  resizable="false" 
-                  width="700"
-                  showEffect="fade"
-                  hideEffect="fade">
+                <h:panelGroup id="recordDialogContent">
 
-            <h:form id="dialogForm">
+                    <p:messages id="dialogMsgs" showDetail="true" closable="true" />
 
-                <p:messages id="dialogMsgs" showDetail="true" closable="true" />
+                    <p:panelGrid columns="2"
+                                 style="width: 100%;"
+                                 columnClasses="label-col,value-col"
+                                 rendered="#{not empty genericCrudCDI.tableColumns}">
 
-                <!-- DYNAMICALLY GENERATE INPUT FIELDS -->
-                <h:panelGrid columns="2" 
-                             cellpadding="5"
-                             styleClass="ui-panelgrid"
-                             rendered="#{not empty genericCrudCDI.tableColumns}">
+                        <ui:repeat value="#{genericCrudCDI.tableColumns}" var="column">
+                            <p:outputLabel value="#{genericCrudCDI.getColumnHeader(column)}:" />
 
-                    <ui:repeat value="#{genericCrudCDI.tableColumns}" var="column">
-                        <p:outputLabel value="#{column}:" for="field_input" />
+                            <h:panelGroup>
+                                <!-- Date fields -->
+                                <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
+                                             style="width: 100%;"
+                                             type="date"
+                                             rendered="#{column eq 'eventDate' or column eq 'validFrom' or column eq 'validTo' or column eq 'reviewDate'}"
+                                             readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
+                                             disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                        <!-- Simple text input for all fields -->
-                        <p:inputText id="field_input" 
-                                     value="#{genericCrudCDI.currentRecord[column]}"
-                                     style="width: 100%;" />
-                    </ui:repeat>
+                                <!-- Time fields -->
+                                <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
+                                             style="width: 100%;"
+                                             type="time"
+                                             rendered="#{column eq 'startTime' or column eq 'endTime'}"
+                                             readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
+                                             disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                </h:panelGrid>
+                                <!-- Number fields -->
+                                <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
+                                             style="width: 100%;"
+                                             type="number"
+                                             rendered="#{column eq 'unitPrice' or column eq 'maxCapacity' or column eq 'vCapacity' or column eq 'discountValue' or column eq 'maxUses' or column eq 'rating'}"
+                                             readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
+                                             disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                <p:separator style="margin: 15px 0;" />
+                                <!-- Textarea for long text -->
+                                <p:inputTextarea value="#{genericCrudCDI.currentRecord[column]}"
+                                                 style="width: 100%;"
+                                                 rows="3"
+                                                 rendered="#{column eq 'description' or column eq 'cDescription' or column eq 'aBio' or column eq 'comment'}"
+                                                 readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
+                                                 disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                <div style="text-align: right;">
-                    <!-- SAVE -->
-                    <p:commandButton value="Save"
-                                     icon="pi pi-check"
-                                     actionListener="#{genericCrudCDI.save}"
-                                     update="dialogMsgs dialogForm :mainForm:dataPanel :mainForm:msgs"
-                                     oncomplete="if (args &amp;&amp; !args.validationFailed) PF('recordDialog').hide();" 
-                                     styleClass="ui-button-success"
-                                     style="margin-right: 10px;" />
+                                <!-- URL fields -->
+                                <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
+                                             style="width: 100%;"
+                                             type="url"
+                                             rendered="#{column eq 'bannerImg' or column eq 'cImg' or column eq 'aImgUrl' or column eq 'imgUrl' or column eq 'link'}"
+                                             readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
+                                             disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                    <!-- CANCEL -->
-                    <p:commandButton value="Cancel"
-                                     icon="pi pi-times"
-                                     onclick="PF('recordDialog').hide(); return false;"
-                                     styleClass="ui-button-secondary" />
-                </div>
+                                <!-- Default text input for all other fields -->
+                                <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
+                                             style="width: 100%;"
+                                             rendered="#{column ne 'eventDate' and column ne 'validFrom' and column ne 'validTo' and column ne 'reviewDate' 
+                                                         and column ne 'startTime' and column ne 'endTime'
+                                                         and column ne 'unitPrice' and column ne 'maxCapacity' and column ne 'vCapacity' and column ne 'discountValue' and column ne 'maxUses' and column ne 'rating'
+                                                         and column ne 'description' and column ne 'cDescription' and column ne 'aBio' and column ne 'comment'
+                                                         and column ne 'bannerImg' and column ne 'cImg' and column ne 'aImgUrl' and column ne 'imgUrl' and column ne 'link'}"
+                                             readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
+                                             disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
+                            </h:panelGroup>
+                        </ui:repeat>
 
-            </h:form>
+                    </p:panelGrid>
 
-        </p:dialog>
+                    <p:separator style="margin: 15px 0;" />
+
+                    <div style="text-align: right;">
+                        <p:commandButton value="Save"
+                                         icon="pi pi-check"
+                                         actionListener="#{genericCrudCDI.save}"
+                                         update=":dialogForm:dialogMsgs :dialogForm:recordDialogContent :mainForm:dataPanel :mainForm:msgs"
+                                         oncomplete="if (args &amp;&amp; !args.validationFailed) PF('recordDialog').hide();"
+                                         styleClass="ui-button-success"
+                                         style="margin-right: 10px;" />
+
+                        <p:commandButton value="Cancel"
+                                         icon="pi pi-times"
+                                         type="button"
+                                         onclick="PF('recordDialog').hide();"
+                                         styleClass="ui-button-secondary" />
+                    </div>
+
+                </h:panelGroup>
+
+            </p:dialog>
+        </h:form>
 
     </h:body>
 </html>

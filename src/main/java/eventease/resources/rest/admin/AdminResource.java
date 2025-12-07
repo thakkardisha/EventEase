@@ -397,6 +397,7 @@ public class AdminResource {
      * PUT /venues
      */
     @PUT
+    @Path("venue/updateVenue")
     //@RolesAllowed({"Admin"})
     public Response updateVenue(Venues venue) {
         try {
@@ -647,7 +648,7 @@ public class AdminResource {
     // Update a category
     @PUT
     //@RolesAllowed({"Admin"})
-    @Path("category/{id}")
+    @Path("category/updateCategory/{id}")
     public Response updateCategory(@PathParam("id") Integer id, Categories category) {
         Categories existing = adminBean.getCategoryById(id);
         if (existing == null) {

@@ -11,11 +11,11 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.*;
 import jwtrest.Constants;
 import record.KeepRecord;
@@ -32,7 +32,6 @@ public class GenericCrudBean implements Serializable {
 
     private Client client;
 
-    // Available tables mapped to their entity names
     private Map<String, String> availableTables;
     private String selectedTable;
     private List<Map<String, Object>> tableData;
@@ -44,6 +43,7 @@ public class GenericCrudBean implements Serializable {
     public void init() {
         client = ClientBuilder.newClient();
         initializeAvailableTables();
+        currentRecord = new LinkedHashMap<>(); // Initialize to prevent null
     }
 
     private void initializeAvailableTables() {
@@ -55,10 +55,6 @@ public class GenericCrudBean implements Serializable {
         availableTables.put("Artists", "artists");
         availableTables.put("Artist Social Links", "socialLinks");
         availableTables.put("Reviews", "reviews");
-        availableTables.put("Interests", "interests");
-        availableTables.put("Wishlists", "wishlists");
-        availableTables.put("Bookings", "bookings");
-        availableTables.put("Payments", "payments");
         availableTables.put("Event Images", "eventImages");
     }
 
@@ -66,8 +62,6 @@ public class GenericCrudBean implements Serializable {
         if (selectedTable != null && !selectedTable.isEmpty()) {
             System.out.println("========== TABLE SELECTED: " + selectedTable + " ==========");
             loadTableData();
-            System.out.println("After loadTableData - tableData size: " + (tableData != null ? tableData.size() : "null"));
-            System.out.println("After loadTableData - tableColumns: " + tableColumns);
         }
     }
 
@@ -82,29 +76,105 @@ public class GenericCrudBean implements Serializable {
             String endpoint = getEndpointForTable(selectedTable);
             WebTarget target = client.target(API_BASE).path(endpoint);
 
+            System.out.println("========== LOADING TABLE DATA ==========");
+            System.out.println("Fetching from: " + API_BASE + endpoint);
+            System.out.println("Selected table: " + selectedTable);
+
             Response r = target
                     .request(MediaType.APPLICATION_JSON)
                     .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + token)
                     .get();
 
+            System.out.println("Response status: " + r.getStatus());
+
             if (r.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
-                String json = r.readEntity(String.class);
-                tableData = parseJsonToMapList(json);
+                List<Map<String, Object>> rawList
+                        = r.readEntity(new GenericType<List<Map<String, Object>>>() {
+                        });
 
-                if (tableData != null && !tableData.isEmpty()) {
-                    tableColumns = new ArrayList<>(tableData.get(0).keySet());
+                System.out.println("Raw list received: " + (rawList != null));
+                System.out.println("Raw list size: " + (rawList != null ? rawList.size() : "null"));
+
+                if (rawList != null && !rawList.isEmpty()) {
+                    System.out.println("First raw record: " + rawList.get(0));
+
+                    tableData = new ArrayList<>();
+                    for (Map<String, Object> rawRecord : rawList) {
+                        Map<String, Object> flatRecord = flattenRecord(rawRecord);
+                        tableData.add(flatRecord);
+                    }
+
+                    System.out.println("Processed tableData size: " + tableData.size());
+                    System.out.println("First processed record: " + tableData.get(0));
+
+                    tableColumns = getOrderedColumnsForTable(selectedTable);
+                    if (tableColumns == null || tableColumns.isEmpty()) {
+                        tableColumns = new ArrayList<>(tableData.get(0).keySet());
+                        System.out.println("Using keys from first record as columns");
+                    }
+
+                    System.out.println("Table columns: " + tableColumns);
+
                     extractColumnTypes();
+                    facesInfo("Loaded " + tableData.size() + " records");
+                } else {
+                    System.out.println("Raw list is null or empty!");
+                    tableData = new ArrayList<>();
+                    tableColumns = new ArrayList<>();
+                    facesInfo("No records found");
                 }
-
-                facesInfo("Loaded " + (tableData != null ? tableData.size() : 0) + " records from " + selectedTable);
             } else {
+                String errorBody = r.readEntity(String.class);
+                System.err.println("Failed to load data. Status: " + r.getStatus());
+                System.err.println("Error body: " + errorBody);
                 facesError("Failed to load data: " + r.getStatus());
                 tableData = new ArrayList<>();
             }
         } catch (Exception e) {
-            facesError("Error loading table data: " + e.getMessage());
+            System.err.println("Exception in loadTableData: " + e.getMessage());
             e.printStackTrace();
+            facesError("Error loading table data: " + e.getMessage());
+            tableData = new ArrayList<>();
         }
+
+        System.out.println("========== LOAD COMPLETE ==========");
+        System.out.println("Final tableData size: " + (tableData != null ? tableData.size() : "null"));
+        System.out.println("Final tableColumns size: " + (tableColumns != null ? tableColumns.size() : "null"));
+    }
+
+    private Map<String, Object> flattenRecord(Map<String, Object> record) {
+        Map<String, Object> flattened = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Object> entry : record.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value instanceof Map) {
+                Map<?, ?> nestedMap = (Map<?, ?>) value;
+                if (key.equals("vId") && nestedMap.containsKey("vId")) {
+                    flattened.put("vId", nestedMap.get("vId"));
+                    if (nestedMap.containsKey("vName")) {
+                        flattened.put("vName", nestedMap.get("vName"));
+                    }
+                } else if (key.equals("cId") && nestedMap.containsKey("cId")) {
+                    flattened.put("cId", nestedMap.get("cId"));
+                    if (nestedMap.containsKey("cName")) {
+                        flattened.put("cName", nestedMap.get("cName"));
+                    }
+                } else if (key.equals("aId") && nestedMap.containsKey("aId")) {
+                    flattened.put("aId", nestedMap.get("aId"));
+                    if (nestedMap.containsKey("aName")) {
+                        flattened.put("aName", nestedMap.get("aName"));
+                    }
+                } else {
+                    flattened.put(key, value.toString());
+                }
+            } else {
+                flattened.put(key, value);
+            }
+        }
+
+        return flattened;
     }
 
     private String getEndpointForTable(String table) {
@@ -116,100 +186,9 @@ public class GenericCrudBean implements Serializable {
         endpoints.put("artists", "artist/getAllArtists");
         endpoints.put("socialLinks", "socialLink/all");
         endpoints.put("reviews", "reviews/getAllReviews");
-        endpoints.put("interests", "interest/count");
-        endpoints.put("wishlists", "wishlist/count");
-        endpoints.put("bookings", "booking/user/1");
-        endpoints.put("payments", "payment/1");
         endpoints.put("eventImages", "eventImages/getAllEventImages");
 
-        return endpoints.getOrDefault(table, table);
-    }
-
-    private List<Map<String, Object>> parseJsonToMapList(String json) {
-        List<Map<String, Object>> result = new ArrayList<>();
-
-        try {
-            // Use the GenericType to parse directly into List<Map>
-            // This leverages the JSON-B or Jackson already in your project
-            if (json == null || json.trim().isEmpty() || json.equals("[]")) {
-                return result;
-            }
-
-            // For simple parsing without external library
-            // Remove [ ] brackets
-            json = json.trim();
-            if (json.startsWith("[")) {
-                json = json.substring(1, json.length() - 1);
-            }
-
-            if (json.trim().isEmpty()) {
-                return result;
-            }
-
-            // Split by objects (assuming proper JSON format)
-            String[] objects = json.split("\\},\\{");
-
-            for (String obj : objects) {
-                obj = obj.trim();
-                if (!obj.startsWith("{")) {
-                    obj = "{" + obj;
-                }
-                if (!obj.endsWith("}")) {
-                    obj = obj + "}";
-                }
-
-                Map<String, Object> map = parseJsonObject(obj);
-                result.add(map);
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error parsing JSON: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return result;
-    }
-
-    private Map<String, Object> parseJsonObject(String json) {
-        Map<String, Object> map = new LinkedHashMap<>();
-
-        try {
-            // Remove { and }
-            json = json.trim();
-            if (json.startsWith("{")) {
-                json = json.substring(1);
-            }
-            if (json.endsWith("}")) {
-                json = json.substring(0, json.length() - 1);
-            }
-
-            // Split by comma (simple approach)
-            String[] pairs = json.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-
-            for (String pair : pairs) {
-                String[] keyValue = pair.split(":", 2);
-                if (keyValue.length == 2) {
-                    String key = keyValue[0].trim().replaceAll("\"", "");
-                    String value = keyValue[1].trim();
-
-                    // Remove quotes from string values
-                    if (value.startsWith("\"") && value.endsWith("\"")) {
-                        value = value.substring(1, value.length() - 1);
-                    }
-
-                    // Handle null
-                    if (value.equals("null")) {
-                        map.put(key, null);
-                    } else {
-                        map.put(key, value);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error parsing JSON object: " + e.getMessage());
-        }
-
-        return map;
+        return endpoints.get(table);
     }
 
     private void extractColumnTypes() {
@@ -218,18 +197,12 @@ public class GenericCrudBean implements Serializable {
             Map<String, Object> firstRow = tableData.get(0);
             for (Map.Entry<String, Object> entry : firstRow.entrySet()) {
                 Object value = entry.getValue();
-                if (value != null) {
-                    columnTypes.put(entry.getKey(), value.getClass().getSimpleName());
-                } else {
-                    columnTypes.put(entry.getKey(), "String");
-                }
+                columnTypes.put(entry.getKey(),
+                        value != null ? value.getClass().getSimpleName() : "String");
             }
         }
     }
 
-    /**
-     * Get columns in database order for each table
-     */
     private List<String> getOrderedColumnsForTable(String table) {
         List<String> columns = new ArrayList<>();
 
@@ -241,28 +214,28 @@ public class GenericCrudBean implements Serializable {
                 columns.add("eventDate");
                 columns.add("startTime");
                 columns.add("endTime");
-                columns.add("vName");  // Venue name instead of vId object
-                columns.add("cName");  // Category name instead of cId object
+                columns.add("vId");
+                columns.add("cId");
                 columns.add("unitPrice");
                 columns.add("maxCapacity");
+                columns.add("bannerImg");
                 columns.add("status");
-                // Skip bannerImg for display
                 break;
 
             case "venues":
                 columns.add("vId");
                 columns.add("vName");
+                columns.add("vAddress");
                 columns.add("vCity");
                 columns.add("vState");
                 columns.add("vCapacity");
-                // Skip vAddress for brevity
                 break;
 
             case "categories":
                 columns.add("cId");
                 columns.add("cName");
                 columns.add("cDescription");
-                // Skip cImg
+                columns.add("cImg");
                 break;
 
             case "coupons":
@@ -271,23 +244,23 @@ public class GenericCrudBean implements Serializable {
                 columns.add("discountType");
                 columns.add("discountValue");
                 columns.add("maxUses");
-                columns.add("currentUses");
                 columns.add("validFrom");
                 columns.add("validTo");
                 columns.add("status");
+                columns.add("isSingleUse");
                 break;
 
             case "artists":
                 columns.add("aId");
                 columns.add("aName");
-                columns.add("aType");
                 columns.add("aBio");
-                // Skip aImgUrl
+                columns.add("aImgUrl");
+                columns.add("aType");
                 break;
 
             case "socialLinks":
                 columns.add("linkId");
-                columns.add("aName"); // Artist name
+                columns.add("aId");
                 columns.add("platform");
                 columns.add("link");
                 break;
@@ -297,33 +270,6 @@ public class GenericCrudBean implements Serializable {
                 columns.add("rating");
                 columns.add("comment");
                 columns.add("reviewDate");
-                // Add event/user names if available
-                break;
-
-            case "bookings":
-                columns.add("bId");
-                columns.add("bookingDate");
-                columns.add("ticketQuantity");
-                columns.add("totalAmount");
-                columns.add("bookingStatus");
-                break;
-
-            case "payments":
-                columns.add("pId");
-                columns.add("paymentDate");
-                columns.add("paymentAmount");
-                columns.add("paymentMethod");
-                columns.add("paymentStatus");
-                break;
-
-            case "interests":
-                columns.add("iId");
-                columns.add("registeredAt");
-                break;
-
-            case "wishlists":
-                columns.add("wId");
-                columns.add("addedAt");
                 break;
 
             case "eventImages":
@@ -331,22 +277,13 @@ public class GenericCrudBean implements Serializable {
                 columns.add("imgUrl");
                 columns.add("altText");
                 break;
-
-            default:
-                // Return empty, will fall back to first record keys
-                break;
         }
 
         return columns;
     }
 
-    /**
-     * Get user-friendly column headers
-     */
     public String getColumnHeader(String columnName) {
         Map<String, String> headers = new HashMap<>();
-
-        // Common mappings
         headers.put("eId", "Event ID");
         headers.put("eName", "Event Name");
         headers.put("eventDate", "Date");
@@ -354,71 +291,59 @@ public class GenericCrudBean implements Serializable {
         headers.put("endTime", "End Time");
         headers.put("unitPrice", "Price");
         headers.put("maxCapacity", "Capacity");
+        headers.put("bannerImg", "Banner Image");
         headers.put("vId", "Venue ID");
         headers.put("vName", "Venue");
+        headers.put("vAddress", "Address");
         headers.put("vCity", "City");
         headers.put("vState", "State");
         headers.put("vCapacity", "Capacity");
         headers.put("cId", "Category ID");
         headers.put("cName", "Category");
         headers.put("cDescription", "Description");
+        headers.put("cImg", "Category Image");
         headers.put("cCode", "Coupon Code");
-        headers.put("discountType", "Type");
-        headers.put("discountValue", "Discount");
+        headers.put("discountType", "Discount Type");
+        headers.put("discountValue", "Discount Value");
         headers.put("maxUses", "Max Uses");
-        headers.put("currentUses", "Used");
         headers.put("validFrom", "Valid From");
         headers.put("validTo", "Valid To");
+        headers.put("isSingleUse", "Single Use");
         headers.put("aId", "Artist ID");
-        headers.put("aName", "Artist");
+        headers.put("aName", "Artist Name");
         headers.put("aType", "Type");
         headers.put("aBio", "Bio");
+        headers.put("aImgUrl", "Image URL");
         headers.put("linkId", "Link ID");
+        headers.put("platform", "Platform");
+        headers.put("link", "Link");
         headers.put("rId", "Review ID");
-        headers.put("bId", "Booking ID");
-        headers.put("bookingDate", "Date");
-        headers.put("ticketQuantity", "Tickets");
-        headers.put("totalAmount", "Amount");
-        headers.put("bookingStatus", "Status");
-        headers.put("pId", "Payment ID");
-        headers.put("paymentDate", "Date");
-        headers.put("paymentAmount", "Amount");
-        headers.put("paymentMethod", "Method");
-        headers.put("paymentStatus", "Status");
-        headers.put("iId", "Interest ID");
-        headers.put("wId", "Wishlist ID");
-        headers.put("registeredAt", "Registered");
-        headers.put("addedAt", "Added");
+        headers.put("rating", "Rating");
+        headers.put("comment", "Comment");
+        headers.put("reviewDate", "Review Date");
         headers.put("imgId", "Image ID");
         headers.put("imgUrl", "Image URL");
         headers.put("altText", "Alt Text");
         headers.put("status", "Status");
         headers.put("description", "Description");
-        headers.put("comment", "Comment");
-        headers.put("rating", "Rating");
-        headers.put("reviewDate", "Date");
-        headers.put("platform", "Platform");
-        headers.put("link", "Link");
 
         return headers.getOrDefault(columnName, columnName);
     }
 
     public void prepareNew() {
-        currentRecord = new HashMap<>();
+        currentRecord = new LinkedHashMap<>();
         if (tableColumns != null) {
             for (String column : tableColumns) {
                 currentRecord.put(column, "");
             }
         }
-        System.out.println("Prepared new record with columns: " + tableColumns);
+        System.out.println("Prepared new record for: " + selectedTable);
+        System.out.println("Current record keys: " + currentRecord.keySet());
     }
 
     public void prepareEdit(Map<String, Object> record) {
-        if (record != null) {
-            currentRecord = new HashMap<>(record);
-        } else {
-            currentRecord = new HashMap<>();
-        }
+        currentRecord = record != null ? new LinkedHashMap<>(record) : new LinkedHashMap<>();
+        System.out.println("Prepared edit for record: " + currentRecord);
     }
 
     public void save() {
@@ -429,22 +354,26 @@ public class GenericCrudBean implements Serializable {
 
         try {
             String token = keepRecord.getToken();
-            if (token == null) {
+            if (token == null || token.isEmpty()) {
                 facesError("Authentication required.");
                 return;
             }
 
-            // Determine if create or update based on ID presence
             Object id = currentRecord.get(getPrimaryKeyColumn());
+            boolean isNew = (id == null || id.toString().trim().isEmpty());
 
-            if (id == null) {
+            System.out.println("========== SAVE OPERATION ==========");
+            System.out.println("Table: " + selectedTable);
+            System.out.println("Is New: " + isNew);
+            System.out.println("Record: " + currentRecord);
+
+            if (isNew) {
                 createRecord();
             } else {
                 updateRecord();
             }
 
             loadTableData();
-            facesInfo("Record saved successfully");
 
         } catch (Exception e) {
             facesError("Error saving record: " + e.getMessage());
@@ -453,11 +382,146 @@ public class GenericCrudBean implements Serializable {
     }
 
     private void createRecord() {
-        // Implementation for create
+        try {
+            String token = keepRecord.getToken();
+            String endpoint = getCreateEndpoint(selectedTable);
+
+            if (endpoint == null || endpoint.isEmpty()) {
+                facesError("Create operation not available for this table");
+                return;
+            }
+
+            System.out.println("Creating via: " + endpoint);
+
+            Form form = new Form();
+            for (Map.Entry<String, Object> entry : currentRecord.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                // Skip primary key and read-only fields
+                if (key.equals(getPrimaryKeyColumn())
+                        || key.equals("vName")
+                        || key.equals("cName")
+                        || key.equals("aName")) {
+                    continue;
+                }
+
+                // Only include non-empty values
+                if (value != null && !value.toString().trim().isEmpty()) {
+                    String strValue = value.toString().trim();
+                    form.param(key, strValue);
+                    System.out.println("  Param: " + key + " = " + strValue);
+                } else {
+                    System.out.println("  Skipping empty param: " + key);
+                }
+            }
+
+            WebTarget target = client.target(API_BASE).path(endpoint);
+            Response r = target.request(MediaType.APPLICATION_JSON)
+                    .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + token)
+                    .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+
+            System.out.println("Response status: " + r.getStatus());
+
+            if (r.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+                facesInfo("Record created successfully");
+            } else {
+                String errorMsg = r.readEntity(String.class);
+                System.err.println("Create failed: " + errorMsg);
+                facesError("Create failed: " + errorMsg);
+            }
+        } catch (Exception e) {
+            System.err.println("Exception in createRecord: " + e.getMessage());
+            e.printStackTrace();
+            facesError("Error creating record: " + e.getMessage());
+        }
     }
 
     private void updateRecord() {
-        // Implementation for update
+        try {
+            String token = keepRecord.getToken();
+            Object id = currentRecord.get(getPrimaryKeyColumn());
+            String endpoint = getUpdateEndpoint(selectedTable, id);
+
+            if (endpoint == null || endpoint.isEmpty()) {
+                facesError("Update operation not available for this table");
+                return;
+            }
+
+            System.out.println("Updating via: " + endpoint);
+
+            Form form = new Form();
+            for (Map.Entry<String, Object> entry : currentRecord.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                // Skip read-only display fields
+                if (key.equals("vName") || key.equals("cName") || key.equals("aName")) {
+                    continue;
+                }
+
+                // Include all non-null values (including primary key for updates)
+                if (value != null && !value.toString().trim().isEmpty()) {
+                    String strValue = value.toString().trim();
+                    form.param(key, strValue);
+                    System.out.println("  Param: " + key + " = " + strValue);
+                } else {
+                    System.out.println("  Skipping empty param: " + key);
+                }
+            }
+
+            WebTarget target = client.target(API_BASE).path(endpoint);
+            Response r = target.request(MediaType.APPLICATION_JSON)
+                    .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + token)
+                    .put(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+
+            System.out.println("Response status: " + r.getStatus());
+
+            if (r.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+                facesInfo("Record updated successfully");
+            } else {
+                String errorMsg = r.readEntity(String.class);
+                System.err.println("Update failed: " + errorMsg);
+                facesError("Update failed: " + errorMsg);
+            }
+        } catch (Exception e) {
+            System.err.println("Exception in updateRecord: " + e.getMessage());
+            e.printStackTrace();
+            facesError("Error updating record: " + e.getMessage());
+        }
+    }
+
+    private String getCreateEndpoint(String table) {
+        Map<String, String> endpoints = new HashMap<>();
+        endpoints.put("events", "event/create");
+        endpoints.put("venues", "venue/addvenue");
+        endpoints.put("categories", "category/addcategory");
+        endpoints.put("coupons", "coupons/createcoupon");
+        endpoints.put("artists", "artist/addartist");
+        endpoints.put("socialLinks", "socialLink/addsociallink");
+
+        return endpoints.get(table);
+    }
+
+    private String getUpdateEndpoint(String table, Object id) {
+        Map<String, String> updatePaths = new HashMap<>();
+        updatePaths.put("events", "event/");
+        updatePaths.put("categories", "category/");
+        updatePaths.put("coupons", "coupons/");
+        updatePaths.put("artists", "artist/");
+        updatePaths.put("reviews", "reviews/");
+        updatePaths.put("socialLinks", "socialLink/update");
+
+        String basePath = updatePaths.get(table);
+        if (basePath == null) {
+            return null;
+        }
+
+        if (table.equals("socialLinks")) {
+            return basePath;
+        }
+
+        return basePath + id;
     }
 
     public void delete(Map<String, Object> record) {
@@ -476,6 +540,8 @@ public class GenericCrudBean implements Serializable {
             String token = keepRecord.getToken();
             String endpoint = getDeleteEndpoint(selectedTable, id);
 
+            System.out.println("Deleting via: " + endpoint);
+
             WebTarget target = client.target(API_BASE).path(endpoint);
             Response r = target.request()
                     .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + token)
@@ -485,7 +551,8 @@ public class GenericCrudBean implements Serializable {
                 facesInfo("Record deleted successfully");
                 loadTableData();
             } else {
-                facesError("Delete failed: " + r.readEntity(String.class));
+                String errorMsg = r.readEntity(String.class);
+                facesError("Delete failed: " + errorMsg);
             }
         } catch (Exception e) {
             facesError("Error deleting record: " + e.getMessage());
@@ -502,19 +569,12 @@ public class GenericCrudBean implements Serializable {
         deletePaths.put("artists", "artist/");
         deletePaths.put("socialLinks", "socialLink/delete/");
         deletePaths.put("reviews", "reviews/");
-        deletePaths.put("payments", "payment/");
         deletePaths.put("eventImages", "eventImages/");
 
         String basePath = deletePaths.get(table);
-        if (basePath == null) {
-            System.err.println("No delete endpoint configured for table: " + table);
-            return table + "/" + id; // fallback
-        }
-
-        return basePath + id;
+        return basePath != null ? basePath + id : table + "/" + id;
     }
 
-    // Public method to get primary key column name
     public String getPrimaryKeyColumn() {
         if (selectedTable == null) {
             return "id";
@@ -527,12 +587,8 @@ public class GenericCrudBean implements Serializable {
         pkColumns.put("coupons", "cId");
         pkColumns.put("artists", "aId");
         pkColumns.put("reviews", "rId");
-        pkColumns.put("bookings", "bId");
-        pkColumns.put("payments", "pId");
-        pkColumns.put("interests", "iId");
-        pkColumns.put("wishlists", "wId");
-        pkColumns.put("eventImages", "imgId");
         pkColumns.put("socialLinks", "linkId");
+        pkColumns.put("eventImages", "imgId");
 
         return pkColumns.getOrDefault(selectedTable, "id");
     }
@@ -572,6 +628,9 @@ public class GenericCrudBean implements Serializable {
     }
 
     public Map<String, Object> getCurrentRecord() {
+        if (currentRecord == null) {
+            currentRecord = new LinkedHashMap<>();
+        }
         return currentRecord;
     }
 

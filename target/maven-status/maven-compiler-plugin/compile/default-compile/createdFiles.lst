@@ -13,6 +13,7 @@ client\AdminClient.class
 entity\Users.class
 jwtrest\JWTCredential.class
 entity\UserGroupMaster.class
+beans\GenericCrudBean$1.class
 utils\EntityMergeUtil.class
 entity\Venues.class
 beans\AdminDashboardBean$1.class
