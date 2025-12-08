@@ -6,7 +6,8 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
     <h:head>
-        <title>Generic CRUD Management</title>
+        <title> CRUD Management</title>
+        <h:outputStylesheet library="css" name="eventease.css"/>
         <style>
             .label-col {
                 width: 30%;
@@ -32,7 +33,7 @@
 
             <p:messages id="msgs" showDetail="true" closable="true" />
 
-            <h2 style="margin-bottom: 12px;">Database CRUD Management</h2>
+            <h2 style="margin-bottom: 12px;"> CRUD Management</h2>
 
             <!-- TABLE SELECTOR DROPDOWN -->
             <p:panelGrid columns="2" style="margin-bottom: 20px;">
@@ -68,7 +69,7 @@
             <h:panelGroup id="dataPanel">
 
                 <p:panel rendered="#{not empty genericCrudCDI.selectedTable}" style="margin-bottom: 10px;">
-                    <strong>Debug:</strong>
+                    <strong>Loaded : </strong>
                     Table: #{genericCrudCDI.selectedTable},
                     Records: #{genericCrudCDI.tableData.size()},
                     Columns: #{genericCrudCDI.tableColumns.size()}
