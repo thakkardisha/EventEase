@@ -1057,23 +1057,8 @@ public class AdminBean implements AdminInterface{
     }
 
     @Override
-    //@RolesAllowed({"Admin"})   
     public void updateArtist(Artists artist) {
-        Artists existing = em.find(Artists.class, artist.getaId());
-
-        if (existing != null) {
-
-            if (artist.getEventsCollection() != null) {
-                artist.setEventsCollection(null);
-            }
-            if (artist.getArtistSocialLinksCollection() != null) {
-                artist.setArtistSocialLinksCollection(null);
-            }
-
-            EntityMergeUtil.mergeNonNullFields(existing, artist);
-
-            em.merge(existing);
-        }
+        em.merge(artist);       
     }
 
     @Override

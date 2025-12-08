@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import utils.EntityMergeUtil;
 
 @Path("/admin")
 @DeclareRoles({"Admin", "User"})
@@ -823,7 +824,7 @@ public class AdminResource {
     }
 
     @DELETE
-    //@RolesAllowed({"Admin"})
+    @RolesAllowed({"Admin"})
     @Path("coupons/{id}")
     public Response deleteCoupon(@PathParam("id") Integer id) {
         Coupons existing = adminBean.getCouponById(id);
@@ -1077,23 +1078,57 @@ public class AdminResource {
 
 
     @PUT
-    @RolesAllowed({"Admin"})
     @Path("artist/{id}")
-    public Response updateArtist(@PathParam("id") Integer id, Artists updatedArtist) {
-        // 1. Retrieve the existing entity (which may be a detached copy)
-        Artists existing = adminBean.getArtistById(id);
+    @RolesAllowed({"Admin"})
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response updateArtist(
+            @PathParam("id") Integer id,
+            @FormParam("aName") String aName,
+            @FormParam("aBio") String aBio,
+            @FormParam("aImgUrl") String aImgUrl,
+            @FormParam("aType") String aType) {
 
-        if (existing == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Artist not found with ID: " + id)
+        System.out.println("========== UPDATE ARTIST ==========");
+        System.out.println("ID: " + id);
+        System.out.println("Name: " + aName);
+        System.out.println("Bio: " + aBio);
+        System.out.println("ImgUrl: " + aImgUrl);
+        System.out.println("Type: " + aType);
+
+        try {
+            Artists existing = adminBean.getArtistById(id);
+            if (existing == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Artist not found with ID: " + id)
+                        .build();
+            }
+
+            // Update only non-null fields
+            if (aName != null && !aName.trim().isEmpty()) {
+                existing.setaName(aName);
+            }
+            if (aBio != null && !aBio.trim().isEmpty()) {
+                existing.setaBio(aBio);
+            }
+            if (aImgUrl != null && !aImgUrl.trim().isEmpty()) {
+                existing.setaImgUrl(aImgUrl);
+            }
+            if (aType != null && !aType.trim().isEmpty()) {
+                existing.setaType(aType);
+            }
+
+            adminBean.updateArtist(existing);
+
+            System.out.println("Artist updated successfully");
+            return Response.ok("Artist updated successfully.").build();
+
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error: " + e.getMessage())
                     .build();
         }
-
-        utils.EntityMergeUtil.mergeNonNullFields(existing, updatedArtist);
-
-        adminBean.updateArtist(existing);
-
-        return Response.ok("Artist updated successfully.").build();
     }
 
     @DELETE
