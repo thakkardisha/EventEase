@@ -125,7 +125,7 @@
         </h:form>
 
         <!-- SEPARATE FORM FOR DIALOG -->
-        <h:form id="dialogForm">
+        <h:form id="dialogForm" enctype="multipart/form-data">
             <p:dialog id="recordDialog"
                       header="#{empty genericCrudCDI.currentRecord[genericCrudCDI.primaryKeyColumn] or genericCrudCDI.currentRecord[genericCrudCDI.primaryKeyColumn] eq '' ? 'Add New' : 'Edit'} Record - #{genericCrudCDI.selectedTable}"
                       widgetVar="recordDialog"
@@ -180,11 +180,35 @@
                                                  readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
                                                  disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                                <!-- URL fields -->
+                                <!-- Image Upload fields -->
+                                <h:panelGroup rendered="#{column eq 'bannerImg' or column eq 'cImg' or column eq 'aImgUrl' or column eq 'imgUrl'}">
+                                    <div style="margin-bottom: 10px;">
+                                        <p:fileUpload mode="simple" 
+                                                      skinSimple="true"
+                                                      label="Choose Image"
+                                                      value="#{genericCrudCDI.uploadedFile}"
+                                                      style="width: 100%;">
+                                            <f:attribute name="fieldName" value="#{column}" />
+                                        </p:fileUpload>
+                                        <p:commandButton value="Upload" 
+                                                         icon="pi pi-upload"
+                                                         ajax="true"
+                                                         process="@form"
+                                                         update=":dialogForm:recordDialogContent :dialogForm:dialogMsgs"
+                                                         actionListener="#{genericCrudCDI.processUpload(column)}"
+                                                         style="margin-top: 5px;"
+                                                         styleClass="ui-button-success ui-button-sm" />
+                                    </div>
+                                    <h:outputText value="✓ Uploaded: #{genericCrudCDI.currentRecord[column]}" 
+                                                  style="font-size: 0.9em; color: #28a745; display: block; margin-top: 5px;"
+                                                  rendered="#{not empty genericCrudCDI.currentRecord[column]}" />
+                                </h:panelGroup>
+
+                                <!-- Regular URL fields (for links, not images) -->
                                 <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
                                              style="width: 100%;"
                                              type="url"
-                                             rendered="#{column eq 'bannerImg' or column eq 'cImg' or column eq 'aImgUrl' or column eq 'imgUrl' or column eq 'link'}"
+                                             rendered="#{column eq 'link'}"
                                              readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
                                              disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 

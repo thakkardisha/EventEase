@@ -15,10 +15,15 @@ import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
 import jwtrest.Constants;
 import record.KeepRecord;
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.file.UploadedFile;
 
 @Named("genericCrudCDI")
 @SessionScoped
@@ -26,6 +31,7 @@ public class GenericCrudBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final String API_BASE = "https://localhost:8181/EventEase/api/admin/";
+    private static final String UPLOAD_BASE_DIR = "D:/ICT/Sem1/102 - Java EE/EventEase/uploads/";
 
     @Inject
     private KeepRecord keepRecord;
@@ -38,11 +44,17 @@ public class GenericCrudBean implements Serializable {
     private Map<String, Object> currentRecord;
     private List<String> tableColumns;
     private Map<String, String> columnTypes;
+    private UploadedFile uploadedFile;
+
+    // Image upload fields
+    private Map<String, String> imageFields; // Maps field names to their upload subdirectories
 
     @PostConstruct
     public void init() {
         client = ClientBuilder.newClient();
         initializeAvailableTables();
+        initializeImageFields();
+        createUploadDirectories();
         currentRecord = new LinkedHashMap<>();
     }
 
@@ -56,6 +68,170 @@ public class GenericCrudBean implements Serializable {
         availableTables.put("Artist Social Links", "socialLinks");
         availableTables.put("Reviews", "reviews");
         availableTables.put("Event Images", "eventImages");
+    }
+
+    private void initializeImageFields() {
+        imageFields = new HashMap<>();
+        // Map image field names to their upload subdirectories
+        imageFields.put("bannerImg", "banners");
+        imageFields.put("cImg", "categories");
+        imageFields.put("aImgUrl", "artists");
+        imageFields.put("imgUrl", "events");
+    }
+
+    private void createUploadDirectories() {
+        for (String subDir : imageFields.values()) {
+            File dir = new File(UPLOAD_BASE_DIR + subDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+                System.out.println("Created upload directory: " + dir.getAbsolutePath());
+            }
+        }
+    }
+
+    // Temporary storage for uploaded files (one per field)
+    private Map<String, UploadedFile> pendingUploads = new HashMap<>();
+
+//    public void handleFileUpload(FileUploadEvent event) {
+//        System.out.println("========== FILE SELECTED ==========");
+//
+//        // Get the field name from the event component's attributes
+//        String fieldName = (String) event.getComponent().getAttributes().get("fieldName");
+//        System.out.println("Field: " + fieldName);
+//        System.out.println("File: " + event.getFile().getFileName());
+//
+//        // Store the file temporarily
+//        pendingUploads.put(fieldName, event.getFile());
+//        facesInfo("File selected: " + event.getFile().getFileName() + ". Click Upload to save it.");
+//    }
+
+//    public void processUpload(String fieldName) {
+//        System.out.println("========== PROCESSING UPLOAD ==========");
+//        System.out.println("Field: " + fieldName);
+//        System.out.println("Current record BEFORE: " + currentRecord);
+//
+//        UploadedFile file = pendingUploads.get(fieldName);
+//
+//        if (file == null) {
+//            facesError("No file selected. Please choose a file first.");
+//            return;
+//        }
+//
+//        try {
+//            if (file.getSize() > 0) {
+//                String originalFileName = file.getFileName();
+//                String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+//                String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
+//
+//                // Get subdirectory for this field
+//                String subDir = imageFields.getOrDefault(fieldName, "misc");
+//                String uploadDir = UPLOAD_BASE_DIR + subDir + "/";
+//
+//                File uploadFile = new File(uploadDir + uniqueFileName);
+//                uploadFile.getParentFile().mkdirs();
+//
+//                // Write file
+//                try (InputStream input = file.getInputStream(); FileOutputStream output = new FileOutputStream(uploadFile)) {
+//                    byte[] buffer = new byte[1024];
+//                    int bytesRead;
+//                    while ((bytesRead = input.read(buffer)) != -1) {
+//                        output.write(buffer, 0, bytesRead);
+//                    }
+//                }
+//
+//                // Store relative path in currentRecord
+//                String relativePath = "uploads/" + subDir + "/" + uniqueFileName;
+//
+//                // CRITICAL: Ensure currentRecord exists
+//                if (currentRecord == null) {
+//                    currentRecord = new LinkedHashMap<>();
+//                }
+//
+//                currentRecord.put(fieldName, relativePath);
+//
+//                // Clear the pending upload
+//                pendingUploads.remove(fieldName);
+//
+//                System.out.println("File uploaded: " + uploadFile.getAbsolutePath());
+//                System.out.println("Stored path: " + relativePath);
+//                System.out.println("Current record AFTER: " + currentRecord);
+//                facesInfo("Image uploaded successfully: " + originalFileName);
+//
+//            } else {
+//                facesError("File is empty");
+//            }
+//        } catch (Exception e) {
+//            facesError("Error uploading file: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
+    
+    public void processUpload(String fieldName) {
+        System.out.println("========== PROCESSING UPLOAD ==========");
+        System.out.println("Field: " + fieldName);
+        System.out.println("Current record BEFORE: " + currentRecord);
+
+        if (uploadedFile == null || uploadedFile.getSize() == 0) {
+            facesError("No file selected. Please choose a file first.");
+            return;
+        }
+
+        try {
+            String originalFileName = uploadedFile.getFileName();
+            String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
+
+            // Get subdirectory for this field
+            String subDir = imageFields.getOrDefault(fieldName, "misc");
+            String uploadDir = UPLOAD_BASE_DIR + subDir + "/";
+
+            File uploadFile = new File(uploadDir + uniqueFileName);
+            uploadFile.getParentFile().mkdirs();
+
+            // Write file
+            try (InputStream input = uploadedFile.getInputStream(); FileOutputStream output = new FileOutputStream(uploadFile)) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = input.read(buffer)) != -1) {
+                    output.write(buffer, 0, bytesRead);
+                }
+            }
+
+            // Store relative path in currentRecord
+            String relativePath = "uploads/" + subDir + "/" + uniqueFileName;
+
+            // CRITICAL: Ensure currentRecord exists
+            if (currentRecord == null) {
+                currentRecord = new LinkedHashMap<>();
+            }
+
+            currentRecord.put(fieldName, relativePath);
+
+            // Clear the uploaded file reference
+            uploadedFile = null;
+
+            System.out.println("File uploaded: " + uploadFile.getAbsolutePath());
+            System.out.println("Stored path: " + relativePath);
+            System.out.println("Current record AFTER: " + currentRecord);
+            facesInfo("Image uploaded successfully: " + originalFileName);
+
+        } catch (Exception e) {
+            facesError("Error uploading file: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+// Add getter and setter
+    public UploadedFile getUploadedFile() {
+        return uploadedFile;
+    }
+
+    public void setUploadedFile(UploadedFile uploadedFile) {
+        this.uploadedFile = uploadedFile;
+    }
+
+    public boolean isImageField(String fieldName) {
+        return imageFields.containsKey(fieldName);
     }
 
     public void onTableSelect() {
@@ -610,3 +786,4 @@ public class GenericCrudBean implements Serializable {
         return columnTypes;
     }
 }
+
