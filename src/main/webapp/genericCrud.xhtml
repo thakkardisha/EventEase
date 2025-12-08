@@ -148,6 +148,42 @@
                             <p:outputLabel value="#{genericCrudCDI.getColumnHeader(column)}:" />
 
                             <h:panelGroup>
+                                <!-- VENUE DROPDOWN (for vId in events table) -->
+                                <p:selectOneMenu value="#{genericCrudCDI.currentRecord[column]}"
+                                                 style="width: 100%;"
+                                                 rendered="#{column eq 'vId' and genericCrudCDI.selectedTable eq 'events'}"
+                                                 disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}">
+                                    <f:selectItem itemLabel="-- Select Venue --" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{genericCrudCDI.availableVenues}"
+                                                   var="venue"
+                                                   itemLabel="#{venue['vName']} (#{venue['vCity']})"
+                                                   itemValue="#{venue['vId']}" />
+                                </p:selectOneMenu>
+
+                                <!-- CATEGORY DROPDOWN (for cId in events table) -->
+                                <p:selectOneMenu value="#{genericCrudCDI.currentRecord[column]}"
+                                                 style="width: 100%;"
+                                                 rendered="#{column eq 'cId' and genericCrudCDI.selectedTable eq 'events'}"
+                                                 disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}">
+                                    <f:selectItem itemLabel="-- Select Category --" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{genericCrudCDI.availableCategories}"
+                                                   var="category"
+                                                   itemLabel="#{category['cName']}"
+                                                   itemValue="#{category['cId']}" />
+                                </p:selectOneMenu>
+
+                                <!-- ARTIST DROPDOWN (for aId in socialLinks table) -->
+                                <p:selectOneMenu value="#{genericCrudCDI.currentRecord[column]}"
+                                                 style="width: 100%;"
+                                                 rendered="#{column eq 'aId' and genericCrudCDI.selectedTable eq 'socialLinks'}"
+                                                 disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}">
+                                    <f:selectItem itemLabel="-- Select Artist --" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{genericCrudCDI.availableArtists}"
+                                                   var="artist"
+                                                   itemLabel="#{artist['aName']}"
+                                                   itemValue="#{artist['aId']}" />
+                                </p:selectOneMenu>
+
                                 <!-- Date fields -->
                                 <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
                                              style="width: 100%;"
@@ -212,6 +248,13 @@
                                              readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
                                              disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
+                                <!-- Skip derived/display-only fields from input -->
+                                <h:outputText value="#{genericCrudCDI.currentRecord[column]}"
+                                              style="width: 100%; display: block; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;"
+                                              rendered="#{(column eq 'vName' and genericCrudCDI.selectedTable eq 'events') 
+                                                          or (column eq 'cName' and genericCrudCDI.selectedTable eq 'events')
+                                                          or (column eq 'aName' and genericCrudCDI.selectedTable eq 'socialLinks')}" />
+
                                 <!-- Default text input for all other fields -->
                                 <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
                                              style="width: 100%;"
@@ -219,7 +262,13 @@
                                                          and column ne 'startTime' and column ne 'endTime'
                                                          and column ne 'unitPrice' and column ne 'maxCapacity' and column ne 'vCapacity' and column ne 'discountValue' and column ne 'maxUses' and column ne 'rating'
                                                          and column ne 'description' and column ne 'cDescription' and column ne 'aBio' and column ne 'comment'
-                                                         and column ne 'bannerImg' and column ne 'cImg' and column ne 'aImgUrl' and column ne 'imgUrl' and column ne 'link'}"
+                                                         and column ne 'bannerImg' and column ne 'cImg' and column ne 'aImgUrl' and column ne 'imgUrl' and column ne 'link'
+                                                         and not (column eq 'vId' and genericCrudCDI.selectedTable eq 'events')
+                                                         and not (column eq 'cId' and genericCrudCDI.selectedTable eq 'events')
+                                                         and not (column eq 'aId' and genericCrudCDI.selectedTable eq 'socialLinks')
+                                                         and not (column eq 'vName' and genericCrudCDI.selectedTable eq 'events')
+                                                         and not (column eq 'cName' and genericCrudCDI.selectedTable eq 'events')
+                                                         and not (column eq 'aName' and genericCrudCDI.selectedTable eq 'socialLinks')}"
                                              readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
                                              disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
                             </h:panelGroup>

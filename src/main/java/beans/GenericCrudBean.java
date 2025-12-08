@@ -45,6 +45,9 @@ public class GenericCrudBean implements Serializable {
     private List<String> tableColumns;
     private Map<String, String> columnTypes;
     private UploadedFile uploadedFile;
+    private List<Map<String, Object>> availableVenues;
+    private List<Map<String, Object>> availableCategories;
+    private List<Map<String, Object>> availableArtists;
 
     // Image upload fields
     private Map<String, String> imageFields; // Maps field names to their upload subdirectories
@@ -447,10 +450,12 @@ public class GenericCrudBean implements Serializable {
                 currentRecord.put(column, "");
             }
         }
+        loadForeignKeyOptions();
     }
 
     public void prepareEdit(Map<String, Object> record) {
         currentRecord = record != null ? new LinkedHashMap<>(record) : new LinkedHashMap<>();
+        loadForeignKeyOptions();
         System.out.println("Prepared edit for: " + currentRecord);
     }
 
@@ -732,6 +737,91 @@ public class GenericCrudBean implements Serializable {
         pkColumns.put("eventImages", "imgId");
 
         return pkColumns.getOrDefault(selectedTable, "id");
+    }
+    
+    public void loadForeignKeyOptions() {
+        if (selectedTable == null) {
+            return;
+        }
+
+        try {
+            String token = keepRecord.getToken();
+            if (token == null || token.isEmpty()) {
+                return;
+            }
+
+            // Load venues if needed
+            if (needsVenues()) {
+                availableVenues = fetchForeignKeyData("venues/getAllVenues", token);
+                System.out.println("Loaded " + (availableVenues != null ? availableVenues.size() : 0) + " venues");
+            }
+
+            // Load categories if needed
+            if (needsCategories()) {
+                availableCategories = fetchForeignKeyData("category/getAllCategories", token);
+                System.out.println("Loaded " + (availableCategories != null ? availableCategories.size() : 0) + " categories");
+            }
+
+            // Load artists if needed
+            if (needsArtists()) {
+                availableArtists = fetchForeignKeyData("artist/getAllArtists", token);
+                System.out.println("Loaded " + (availableArtists != null ? availableArtists.size() : 0) + " artists");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error loading foreign key options: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private List<Map<String, Object>> fetchForeignKeyData(String endpoint, String token) {
+        try {
+            WebTarget target = client.target(API_BASE).path(endpoint);
+            Response r = target
+                    .request(MediaType.APPLICATION_JSON)
+                    .header(Constants.AUTHORIZATION_HEADER, Constants.BEARER + token)
+                    .get();
+
+            if (r.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+                List<Map<String, Object>> rawList = r.readEntity(new GenericType<List<Map<String, Object>>>() {
+                });
+                if (rawList != null && !rawList.isEmpty()) {
+                    List<Map<String, Object>> result = new ArrayList<>();
+                    for (Map<String, Object> item : rawList) {
+                        result.add(flattenRecord(item));
+                    }
+                    return result;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching FK data from " + endpoint + ": " + e.getMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    private boolean needsVenues() {
+        return selectedTable != null && selectedTable.equals("events");
+    }
+
+    private boolean needsCategories() {
+        return selectedTable != null && selectedTable.equals("events");
+    }
+
+    private boolean needsArtists() {
+        return selectedTable != null && selectedTable.equals("socialLinks");
+    }
+
+
+    public List<Map<String, Object>> getAvailableVenues() {
+        return availableVenues != null ? availableVenues : new ArrayList<>();
+    }
+
+    public List<Map<String, Object>> getAvailableCategories() {
+        return availableCategories != null ? availableCategories : new ArrayList<>();
+    }
+
+    public List<Map<String, Object>> getAvailableArtists() {
+        return availableArtists != null ? availableArtists : new ArrayList<>();
     }
 
     private void facesInfo(String msg) {
