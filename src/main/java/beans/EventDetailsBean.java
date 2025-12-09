@@ -250,7 +250,7 @@ public class EventDetailsBean implements Serializable {
     }
 
     public String backToHome() {
-        return "home.jsf?faces-redirect=true";
+        return "Home.jsf?faces-redirect=true";
     }
 
     // Utility Methods

@@ -707,23 +707,19 @@
                                             #{review.userId.fullName}
                                         </span>
                                         <span class="review-date">
-                                            <h:outputText value="#{review.reviewDate}">
+                                            <h:outputText value="#{review.rDate}">
                                                 <f:convertDateTime pattern="MMM dd, yyyy"/>
                                             </h:outputText>
                                         </span>
                                     </div>
-                                    <div class="review-rating">
-                                        <ui:repeat value="#{eventDetailsBean.getRatingStars(review.rating)}" var="star">
-                                            <i class="fas fa-star"></i>
-                                        </ui:repeat>
-                                    </div>
-                                    <p class="review-comment">#{review.comment}</p>
+                                    
+                                    <p class="review-comment">#{review.review}</p>
                                 </div>
                             </ui:repeat>
 
                             <p:outputPanel rendered="#{empty eventDetailsBean.reviews}">
                                 <p style="color: #A89BBF; text-align: center; padding: 20px;">
-                                    No reviews yet. Be the first to review this event!
+                                    No reviews yet.
                                 </p>
                             </p:outputPanel>
                         </div>
