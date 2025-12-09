@@ -92,9 +92,8 @@ public class SecureAuthentication implements HttpAuthenticationMechanism, Serial
                         // Return SUCCESS after forward
                         return AuthenticationStatus.SUCCESS;
                     } 
-                    else if (result.getCallerGroups().contains("User")) { 
-                        request.getRequestDispatcher("user/User.jsf").forward(request, response);
-                        // Return SUCCESS after forward
+                    else if (result.getCallerGroups().contains("User")) {
+                        response.sendRedirect(request.getContextPath() + "/user/Home.jsf");
                         return AuthenticationStatus.SUCCESS;
                     }
                     

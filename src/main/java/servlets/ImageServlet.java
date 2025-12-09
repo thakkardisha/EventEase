@@ -11,30 +11,66 @@ import java.nio.file.Files;
 
 @WebServlet("/uploads/*")
 public class ImageServlet extends HttpServlet {
-    
-    private static final String UPLOAD_DIR = "D:/ICT/Sem1/102 - Java EE/EventEase/uploads/banners/";
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        String filename = request.getPathInfo().substring(1); // Remove leading slash
-        File file = new File(UPLOAD_DIR, filename);
-        
-        if (!file.exists()) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+        // Get the requested path (everything after /uploads/)
+        String requestedPath = request.getPathInfo();
+
+        System.out.println("========== IMAGE SERVLET ==========");
+        System.out.println("Full Request URI: " + request.getRequestURI());
+        System.out.println("Path Info: " + requestedPath);
+
+        if (requestedPath == null || requestedPath.length() <= 1) {
+            System.err.println("ERROR: Invalid path");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid image path");
             return;
         }
-        
+
+        // Remove leading slash
+        String filename = requestedPath.substring(1);
+        System.out.println("Looking for file: " + filename);
+
+        // Get the real path to the uploads folder
+        String uploadsPath = getServletContext().getRealPath("/uploads");
+        System.out.println("Uploads directory: " + uploadsPath);
+
+        File file = new File(uploadsPath, filename);
+        System.out.println("Complete file path: " + file.getAbsolutePath());
+        System.out.println("File exists: " + file.exists());
+        System.out.println("Is file: " + file.isFile());
+        System.out.println("Can read: " + file.canRead());
+
+        if (!file.exists() || !file.isFile()) {
+            System.err.println("ERROR: File not found or not a file");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found: " + filename);
+            return;
+        }
+
         // Set content type based on file extension
         String contentType = getServletContext().getMimeType(file.getName());
         if (contentType == null) {
             contentType = "application/octet-stream";
         }
+
+        System.out.println("Content type: " + contentType);
+
         response.setContentType(contentType);
-        response.setHeader("Content-Length", String.valueOf(file.length()));
-        response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
-        
-        Files.copy(file.toPath(), response.getOutputStream());
+        response.setContentLength((int) file.length());
+
+        // Set cache headers for better performance
+        response.setHeader("Cache-Control", "public, max-age=31536000");
+
+        // Copy file to response output stream
+        try {
+            Files.copy(file.toPath(), response.getOutputStream());
+            System.out.println("SUCCESS: Image served successfully");
+        } catch (IOException e) {
+            System.err.println("ERROR: Failed to copy file to output stream");
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

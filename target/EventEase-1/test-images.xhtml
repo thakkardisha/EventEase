@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <h:head>
+        <title>Image Test</title>
+    </h:head>
+
+    <h:body>
+        <h1>Image Debug Page</h1>
+
+        <h2>Categories Debug</h2>
+        <ui:repeat value="#{homeBean.categories}" var="category">
+            <div style="border: 1px solid black; padding: 10px; margin: 10px;">
+                <p><strong>Category Name:</strong> #{category.cName}</p>
+                <p><strong>Category ID:</strong> #{category.cId}</p>
+                <p><strong>Image Path from DB:</strong> #{category.cImg}</p>
+                <p><strong>Full URL:</strong> #{request.contextPath}/#{category.cImg}</p>
+
+                <h3>Test Image Display:</h3>
+                <img src="#{request.contextPath}/#{category.cImg}" 
+                     alt="#{category.cName}" 
+                     style="max-width: 200px; border: 2px solid red;"
+                     onerror="this.style.border='2px solid red'; this.alt='FAILED TO LOAD';" />
+            </div>
+        </ui:repeat>
+
+        <hr/>
+
+        <h2>Events Debug</h2>
+        <ui:repeat value="#{homeBean.upcomingEvents}" var="event">
+            <div style="border: 1px solid black; padding: 10px; margin: 10px;">
+                <p><strong>Event Name:</strong> #{event.eName}</p>
+                <p><strong>Event ID:</strong> #{event.eId}</p>
+                <p><strong>Banner Path from DB:</strong> #{event.bannerImg}</p>
+                <p><strong>Full URL:</strong> #{request.contextPath}/#{event.bannerImg}</p>
+
+                <h3>Test Image Display:</h3>
+                <img src="#{request.contextPath}/#{event.bannerImg}" 
+                     alt="#{event.eName}" 
+                     style="max-width: 300px; border: 2px solid blue;"
+                     onerror="this.style.border='2px solid red'; this.alt='FAILED TO LOAD';" />
+            </div>
+        </ui:repeat>
+
+        <hr/>
+
+        <h2>Direct Image Test</h2>
+        <p>Try accessing directly in browser:</p>
+        <a href="#{request.contextPath}/uploads/categories/1765184680748_music.png" target="_blank">
+            #{request.contextPath}/uploads/categories/1765184680748_music.png
+        </a>
+    </h:body>
+</html>

@@ -32,10 +32,12 @@ D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\ejb\impl\user\UserBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\CouponUsage.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\AdminDashboardBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Interests.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\converters\LocalDateConverter.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\RegisterBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\eventease\JakartaRestConfiguration.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\eventease\resources\rest\user\UserResource.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\filter\NoCacheFilter.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\HomeBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Categories.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\EventImages.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\UserGroupMaster.java

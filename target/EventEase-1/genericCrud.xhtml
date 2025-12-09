@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
@@ -35,7 +35,7 @@
 
             <h2 style="margin-bottom: 12px;"> CRUD Management</h2>
 
-            <!-- TABLE SELECTOR DROPDOWN -->
+             TABLE SELECTOR DROPDOWN 
             <p:panelGrid columns="2" style="margin-bottom: 20px;">
                 <h:outputLabel value="Select Table:" for="tableDropdown" />
                 <p:selectOneMenu id="tableDropdown"
@@ -54,7 +54,7 @@
                 </p:selectOneMenu>
             </p:panelGrid>
 
-            <!-- ADD BUTTON -->
+             ADD BUTTON 
             <p:commandButton id="addButton"
                              value="Add New Record"
                              icon="pi pi-plus"
@@ -65,7 +65,7 @@
                              disabled="#{empty genericCrudCDI.selectedTable}"
                              style="margin-bottom: 15px;" />
 
-            <!-- DATA PANEL -->
+             DATA PANEL 
             <h:panelGroup id="dataPanel">
 
                 <p:panel rendered="#{not empty genericCrudCDI.selectedTable}" style="margin-bottom: 10px;">
@@ -125,7 +125,7 @@
 
         </h:form>
 
-        <!-- SEPARATE FORM FOR DIALOG -->
+         SEPARATE FORM FOR DIALOG 
         <h:form id="dialogForm" enctype="multipart/form-data">
             <p:dialog id="recordDialog"
                       header="#{empty genericCrudCDI.currentRecord[genericCrudCDI.primaryKeyColumn] or genericCrudCDI.currentRecord[genericCrudCDI.primaryKeyColumn] eq '' ? 'Add New' : 'Edit'} Record - #{genericCrudCDI.selectedTable}"
@@ -149,7 +149,7 @@
                             <p:outputLabel value="#{genericCrudCDI.getColumnHeader(column)}:" />
 
                             <h:panelGroup>
-                                <!-- VENUE DROPDOWN (for vId in events table) -->
+                                 VENUE DROPDOWN (for vId in events table) 
                                 <p:selectOneMenu value="#{genericCrudCDI.currentRecord[column]}"
                                                  style="width: 100%;"
                                                  rendered="#{column eq 'vId' and genericCrudCDI.selectedTable eq 'events'}"
@@ -161,7 +161,7 @@
                                                    itemValue="#{venue['vId']}" />
                                 </p:selectOneMenu>
 
-                                <!-- CATEGORY DROPDOWN (for cId in events table) -->
+                                 CATEGORY DROPDOWN (for cId in events table) 
                                 <p:selectOneMenu value="#{genericCrudCDI.currentRecord[column]}"
                                                  style="width: 100%;"
                                                  rendered="#{column eq 'cId' and genericCrudCDI.selectedTable eq 'events'}"
@@ -173,7 +173,7 @@
                                                    itemValue="#{category['cId']}" />
                                 </p:selectOneMenu>
 
-                                <!-- ARTIST DROPDOWN (for aId in socialLinks table) -->
+                                 ARTIST DROPDOWN (for aId in socialLinks table) 
                                 <p:selectOneMenu value="#{genericCrudCDI.currentRecord[column]}"
                                                  style="width: 100%;"
                                                  rendered="#{column eq 'aId' and genericCrudCDI.selectedTable eq 'socialLinks'}"
@@ -185,7 +185,7 @@
                                                    itemValue="#{artist['aId']}" />
                                 </p:selectOneMenu>
 
-                                <!-- Date fields -->
+                                 Date fields 
                                 <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
                                              style="width: 100%;"
                                              type="date"
@@ -193,7 +193,7 @@
                                              readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
                                              disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                                <!-- Time fields -->
+                                 Time fields 
                                 <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
                                              style="width: 100%;"
                                              type="time"
@@ -201,7 +201,7 @@
                                              readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
                                              disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                                <!-- Number fields -->
+                                 Number fields 
                                 <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
                                              style="width: 100%;"
                                              type="number"
@@ -209,7 +209,7 @@
                                              readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
                                              disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                                <!-- Textarea for long text -->
+                                 Textarea for long text 
                                 <p:inputTextarea value="#{genericCrudCDI.currentRecord[column]}"
                                                  style="width: 100%;"
                                                  rows="3"
@@ -217,7 +217,7 @@
                                                  readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
                                                  disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                                <!-- Image Upload fields -->
+                                 Image Upload fields 
                                 <h:panelGroup rendered="#{column eq 'bannerImg' or column eq 'cImg' or column eq 'aImgUrl' or column eq 'imgUrl'}">
                                     <div style="margin-bottom: 10px;">
                                         <p:fileUpload mode="simple" 
@@ -241,7 +241,7 @@
                                                   rendered="#{not empty genericCrudCDI.currentRecord[column]}" />
                                 </h:panelGroup>
 
-                                <!-- Regular URL fields (for links, not images) -->
+                                 Regular URL fields (for links, not images) 
                                 <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
                                              style="width: 100%;"
                                              type="url"
@@ -249,14 +249,14 @@
                                              readonly="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}"
                                              disabled="#{column eq genericCrudCDI.primaryKeyColumn and not empty genericCrudCDI.currentRecord[column]}" />
 
-                                <!-- Skip derived/display-only fields from input -->
+                                 Skip derived/display-only fields from input 
                                 <h:outputText value="#{genericCrudCDI.currentRecord[column]}"
                                               style="width: 100%; display: block; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;"
                                               rendered="#{(column eq 'vName' and genericCrudCDI.selectedTable eq 'events') 
                                                           or (column eq 'cName' and genericCrudCDI.selectedTable eq 'events')
                                                           or (column eq 'aName' and genericCrudCDI.selectedTable eq 'socialLinks')}" />
 
-                                <!-- Default text input for all other fields -->
+                                 Default text input for all other fields 
                                 <p:inputText value="#{genericCrudCDI.currentRecord[column]}"
                                              style="width: 100%;"
                                              rendered="#{column ne 'eventDate' and column ne 'validFrom' and column ne 'validTo' and column ne 'reviewDate' 
@@ -301,4 +301,4 @@
         </h:form>
 
     </h:body>
-</html>
+</html>-->
