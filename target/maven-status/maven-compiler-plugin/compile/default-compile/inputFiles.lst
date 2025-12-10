@@ -25,6 +25,7 @@ D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\client\AdminClient.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\ArtistSocialLinks.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\ejb\interfaces\admin\AdminInterface.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Bookings.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\PaymentBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\AuditLogs.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\LoginBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\UserReportBean.java

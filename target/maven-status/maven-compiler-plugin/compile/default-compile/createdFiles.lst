@@ -11,7 +11,6 @@ ejb\impl\admin\AdminBean.class
 beans\HomeBean$2.class
 ejb\impl\user\UserBean.class
 ejb\interfaces\admin\AdminInterface.class
-eventease\beans\EventDetailsBean.class
 entity\Reviews.class
 entity\Categories.class
 filter\NoCacheFilter.class
@@ -29,7 +28,9 @@ eventease\resources\rest\user\UserResource.class
 entity\Interests.class
 entity\Payments.class
 eventease\resources\JakartaEE10Resource.class
+beans\PaymentBean.class
 record\KeepRecord.class
+beans\EventDetailsBean.class
 beans\UserReportBean.class
 entity\Users.class
 entity\UserGroupMaster.class

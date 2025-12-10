@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <h:head>
+        <title>Payment - EventEase</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                background-color: #0b043a !important;
+                color: #F4F0F8;
+                font-family: "Segoe UI", Arial, sans-serif;
+                overflow-x: hidden;
+            }
+
+            /* Header */
+            .payment-header {
+                background: rgba(255, 255, 255, 0.06);
+                backdrop-filter: blur(6px);
+                padding: 15px 40px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .logo-img {
+                height: 45px;
+                cursor: pointer;
+            }
+
+            /* Main Container */
+            .payment-container {
+                max-width: 1200px;
+                margin: 40px auto;
+                padding: 0 40px;
+            }
+
+            .payment-grid {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 30px;
+            }
+
+            /* Left Section */
+            .payment-section {
+                background: rgba(255, 255, 255, 0.06);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 30px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            }
+
+            .section-title {
+                font-size: 24px;
+                color: #C8B8E8;
+                margin-bottom: 25px;
+                border-left: 4px solid #A89BBF;
+                padding-left: 15px;
+            }
+
+            /* Event Summary */
+            .event-summary {
+                display: flex;
+                gap: 20px;
+                padding: 20px;
+                background: rgba(255, 255, 255, 0.04);
+                border-radius: 12px;
+                margin-bottom: 30px;
+            }
+
+            .event-image {
+                width: 120px;
+                height: 120px;
+                border-radius: 10px;
+                object-fit: cover;
+            }
+
+            .event-details {
+                flex: 1;
+            }
+
+            .event-name {
+                font-size: 20px;
+                font-weight: bold;
+                color: #F4F0F8;
+                margin-bottom: 8px;
+            }
+
+            .event-info-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #C8B8E8;
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+
+            /* Coupons Section */
+            .coupons-list {
+                display: grid;
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+
+            .coupon-card {
+                background: rgba(255, 255, 255, 0.04);
+                border: 2px solid rgba(168, 155, 191, 0.3);
+                border-radius: 12px;
+                padding: 20px;
+                cursor: pointer;
+                transition: all 0.3s;
+                position: relative;
+            }
+
+            .coupon-card:hover {
+                border-color: #A89BBF;
+                background: rgba(168, 155, 191, 0.1);
+            }
+
+            .coupon-card.selected {
+                border-color: #C8B8E8;
+                background: rgba(200, 184, 232, 0.15);
+            }
+
+            .coupon-card.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .coupon-card.disabled:hover {
+                border-color: rgba(168, 155, 191, 0.3);
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            .coupon-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+            }
+
+            .coupon-code {
+                font-size: 18px;
+                font-weight: bold;
+                color: #C8B8E8;
+            }
+
+            .coupon-badge {
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+            .badge-percent {
+                background: rgba(76, 175, 80, 0.2);
+                color: #4CAF50;
+            }
+
+            .badge-fixed {
+                background: rgba(33, 150, 243, 0.2);
+                color: #2196F3;
+            }
+
+            .coupon-description {
+                color: #E0D5F0;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+
+            .coupon-validity {
+                display: flex;
+                gap: 15px;
+                font-size: 13px;
+                color: #A89BBF;
+            }
+
+            /* Custom Checkbox Styling */
+            .coupon-checkbox-link {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                text-decoration: none;
+                z-index: 10;
+            }
+
+            .checkbox-wrapper {
+                font-size: 24px;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .checkbox-checked {
+                color: #C8B8E8;
+            }
+
+            .checkbox-unchecked {
+                color: #A89BBF;
+                opacity: 0.5;
+            }
+
+            .coupon-card.disabled .checkbox-wrapper {
+                cursor: not-allowed;
+                opacity: 0.3;
+            }
+
+            /* Right Section - Summary */
+            .summary-card {
+                background: linear-gradient(135deg, rgba(200, 184, 232, 0.15), rgba(168, 155, 191, 0.15));
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 30px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                position: sticky;
+                top: 100px;
+            }
+
+            .summary-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 15px 0;
+                border-bottom: 1px solid rgba(168, 155, 191, 0.2);
+            }
+
+            .summary-row:last-child {
+                border-bottom: none;
+            }
+
+            .summary-label {
+                color: #C8B8E8;
+                font-size: 15px;
+            }
+
+            .summary-value {
+                color: #F4F0F8;
+                font-weight: bold;
+                font-size: 15px;
+            }
+
+            .discount-value {
+                color: #4CAF50;
+            }
+
+            .total-row {
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 2px solid rgba(168, 155, 191, 0.3);
+            }
+
+            .total-label {
+                font-size: 18px;
+                color: #C8B8E8;
+            }
+
+            .total-value {
+                font-size: 28px;
+                color: #C8B8E8;
+                font-weight: bold;
+            }
+
+            .pay-button {
+                width: 100% !important;
+                margin-top: 25px !important;
+                padding: 16px !important;
+                background: linear-gradient(135deg, #A89BBF, #8B7BA8) !important;
+                border: none !important;
+                border-radius: 10px !important;
+                color: #F4F0F8 !important;
+                font-size: 18px !important;
+                font-weight: bold !important;
+                cursor: pointer;
+                transition: all 0.3s;
+                box-shadow: 0 4px 15px rgba(168, 155, 191, 0.4);
+            }
+
+            .pay-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(168, 155, 191, 0.6);
+            }
+
+            .security-note {
+                margin-top: 20px;
+                padding: 15px;
+                background: rgba(168, 155, 191, 0.1);
+                border-radius: 8px;
+                text-align: center;
+                font-size: 13px;
+                color: #A89BBF;
+            }
+
+            /* No Coupons Message */
+            .no-coupons {
+                padding: 30px;
+                text-align: center;
+                color: #A89BBF;
+                background: rgba(255, 255, 255, 0.04);
+                border-radius: 12px;
+            }
+
+            /* Footer */
+            .footer {
+                background: rgba(255, 255, 255, 0.04);
+                padding: 25px 40px;
+                text-align: center;
+                color: #c8c0d8;
+                font-size: 14px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                margin-top: 60px;
+            }
+
+            /* Responsive */
+            @media (max-width: 1024px) {
+                .payment-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .summary-card {
+                    position: static;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .payment-container {
+                    padding: 0 20px;
+                }
+
+                .event-summary {
+                    flex-direction: column;
+                }
+
+                .event-image {
+                    width: 100%;
+                    height: 200px;
+                }
+            }
+        </style>
+    </h:head>
+
+    <h:body>
+        <p:growl id="msgs" showDetail="true" life="3000"/>
+
+        <!-- Header -->
+        <div class="payment-header">
+            <h:graphicImage library="images" name="EventEase.png" 
+                            styleClass="logo-img" 
+                            alt="EventEase"
+                            onclick="window.location = 'Home.jsf'"/>
+
+            <h2 style="color: #C8B8E8; font-size: 24px;">Complete Your Payment</h2>
+        </div>
+
+        <!-- Main Content -->
+        <div class="payment-container">
+            <h:form id="paymentForm">
+                <div class="payment-grid">
+                    <!-- Left Section -->
+                    <div class="payment-section">
+                        <!-- Event Summary -->
+                        <h2 class="section-title">Booking Summary</h2>
+                        <div class="event-summary">
+                            <h:graphicImage value="/#{paymentBean.event.bannerImg}" 
+                                            styleClass="event-image"
+                                            alt="#{paymentBean.event.eName}"/>
+
+                            <div class="event-details">
+                                <div class="event-name">#{paymentBean.event.eName}</div>
+                                <div class="event-info-row">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <h:outputText value="#{paymentBean.event.eventDate}">
+                                        <f:converter converterId="localDateConverter"/>
+                                    </h:outputText>
+                                </div>
+                                <div class="event-info-row">
+                                    <i class="far fa-clock"></i>
+                                    <h:outputText value="#{paymentBean.event.startTime}"/>
+                                </div>
+                                <div class="event-info-row">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    #{paymentBean.ticketQuantity} Ticket(s)
+                                </div>
+                                <div class="event-info-row">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    #{paymentBean.event.vId.vName}, #{paymentBean.event.vId.vCity}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coupons Section -->
+                        <h2 class="section-title">Apply Coupons (Max 2) - Optional</h2>
+
+                        <p:outputPanel rendered="#{not empty paymentBean.availableCoupons}">
+                            <div class="coupons-list">
+                                <ui:repeat value="#{paymentBean.availableCoupons}" var="coupon">
+                                    <h:panelGroup layout="block" 
+                                                  styleClass="coupon-card #{paymentBean.isCouponSelected(coupon) ? 'selected' : ''} 
+                                                  #{paymentBean.selectedCoupons.size() >= 2 and not paymentBean.isCouponSelected(coupon) ? 'disabled' : ''}">
+
+                                        <p:commandLink styleClass="coupon-checkbox-link" 
+                                                       actionListener="#{paymentBean.toggleCoupon(coupon)}"
+                                                       update="paymentForm"
+                                                       disabled="#{paymentBean.selectedCoupons.size() >= 2 and not paymentBean.isCouponSelected(coupon)}">
+                                            <div class="checkbox-wrapper">
+                                                <h:outputText value="☑" 
+                                                              styleClass="checkbox-checked"
+                                                              rendered="#{paymentBean.isCouponSelected(coupon)}"/>
+                                                <h:outputText value="☐" 
+                                                              styleClass="checkbox-unchecked"
+                                                              rendered="#{not paymentBean.isCouponSelected(coupon)}"/>
+                                            </div>
+                                        </p:commandLink>
+
+                                        <div class="coupon-header">
+                                            <span class="coupon-code">#{coupon.cCode}</span>
+                                            <span class="coupon-badge #{coupon.discountType == 'percent' ? 'badge-percent' : 'badge-fixed'}">
+                                                <h:outputText value="#{coupon.discountValue}% OFF" 
+                                                              rendered="#{coupon.discountType == 'percent'}"/>
+                                                <h:outputText value="₹#{coupon.discountValue} OFF" 
+                                                              rendered="#{coupon.discountType == 'fixed' or coupon.discountType == 'flat'}"/>
+                                            </span>
+                                        </div>
+
+                                        <div class="coupon-description">
+                                            Save 
+                                            <h:outputText value="#{coupon.discountValue}%" 
+                                                          rendered="#{coupon.discountType == 'percent'}"/>
+                                            <h:outputText value="₹#{coupon.discountValue}" 
+                                                          rendered="#{coupon.discountType == 'fixed' or coupon.discountType == 'flat'}"/>
+                                            on your booking
+                                        </div>
+
+                                        <div class="coupon-validity">
+                                            <span>
+                                                <i class="far fa-calendar"></i>
+                                                Valid: <h:outputText value="#{coupon.validFrom}">
+                                                    <f:converter converterId="localDateConverter"/>
+                                                </h:outputText>
+                                                - 
+                                                <h:outputText value="#{coupon.validTo}">
+                                                    <f:converter converterId="localDateConverter"/>
+                                                </h:outputText>
+                                            </span>
+                                            <span>
+                                                <i class="fas fa-users"></i>
+                                                #{coupon.usedCount}/#{coupon.maxUses} used
+                                            </span>
+                                        </div>
+                                    </h:panelGroup>
+                                </ui:repeat>
+                            </div>
+                        </p:outputPanel>
+
+                        <p:outputPanel rendered="#{empty paymentBean.availableCoupons}">
+                            <div class="no-coupons">
+                                <i class="fas fa-ticket-alt" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+                                <p>No coupons available for this event</p>
+                            </div>
+                        </p:outputPanel>
+                    </div>
+
+                    <!-- Right Section - Summary -->
+                    <div class="summary-card">
+                        <h2 class="section-title" style="margin-bottom: 20px;">Payment Summary</h2>
+
+                        <div class="summary-row">
+                            <span class="summary-label">Ticket Price (×#{paymentBean.ticketQuantity})</span>
+                            <span class="summary-value">
+                                ₹<h:outputText value="#{paymentBean.originalAmount}">
+                                    <f:convertNumber type="number" groupingUsed="true"/>
+                                </h:outputText>
+                            </span>
+                        </div>
+
+                        <p:outputPanel rendered="#{paymentBean.totalDiscount > 0}">
+                            <div class="summary-row">
+                                <span class="summary-label">
+                                    Discount 
+                                    <span style="font-size: 12px; color: #4CAF50;">
+                                        (#{paymentBean.selectedCoupons.size()} coupon#{paymentBean.selectedCoupons.size() > 1 ? 's' : ''} applied)
+                                    </span>
+                                </span>
+                                <span class="summary-value discount-value">
+                                    -₹<h:outputText value="#{paymentBean.totalDiscount}">
+                                        <f:convertNumber type="number" groupingUsed="true"/>
+                                    </h:outputText>
+                                </span>
+                            </div>
+                        </p:outputPanel>
+
+                        <div class="summary-row total-row">
+                            <span class="total-label">Total Amount</span>
+                            <span class="total-value">
+                                ₹<h:outputText value="#{paymentBean.finalAmount}">
+                                    <f:convertNumber type="number" groupingUsed="true"/>
+                                </h:outputText>
+                            </span>
+                        </div>
+
+                        <p:commandButton value="Process Payment and Book" 
+                                         styleClass="pay-button"
+                                         icon="fas fa-lock"
+                                         action="#{paymentBean.processPayment}"
+                                         update="msgs"
+                                         ajax="false"/>
+
+                        <div class="security-note">
+                            <i class="fas fa-shield-alt"></i>
+                            Your payment is secure and encrypted
+                        </div>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            © 2025 EventEase. All rights reserved.
+        </div>
+    </h:body>
+</html>

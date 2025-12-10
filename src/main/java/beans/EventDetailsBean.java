@@ -1,4 +1,4 @@
-package eventease.beans;
+package beans;
 
 import ejb.interfaces.admin.AdminInterface;
 import ejb.interfaces.user.UserInterface;
@@ -150,27 +150,13 @@ public class EventDetailsBean implements Serializable {
                 return null;
             }
 
-            // Create booking
-            Bookings booking = new Bookings();
-            booking.seteId(event);
-            booking.setuserId(currentUser);
-            booking.setticketCount(ticketQuantity);
-            booking.settotalAmount(getTotalAmount().longValue());
-            booking.setbookingDate(new Date());
-
-            // Save booking
-            userBean.placeBooking(booking);
-
-            addMessage(FacesMessage.SEVERITY_INFO, "Success",
-                    "Booking placed successfully! Proceeding to payment...");
-
-            // Redirect to payment page
-            return "payment.jsf?bookingId=" + booking.getbId() + "&faces-redirect=true";
+            // Redirect to payment page with booking details
+            return "payment.jsf?eventId=" + eventId + "&quantity=" + ticketQuantity + "&faces-redirect=true";
 
         } catch (Exception e) {
             e.printStackTrace();
             addMessage(FacesMessage.SEVERITY_ERROR, "Error",
-                    "Failed to create booking: " + e.getMessage());
+                    "Failed to proceed to payment: " + e.getMessage());
             return null;
         }
     }
@@ -250,7 +236,7 @@ public class EventDetailsBean implements Serializable {
     }
 
     public String backToHome() {
-        return "Home.jsf?faces-redirect=true";
+        return "home.jsf?faces-redirect=true";
     }
 
     // Utility Methods
