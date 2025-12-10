@@ -182,13 +182,13 @@ public class EventDetailsBean implements Serializable {
                 }
                 isInterested = false;
                 addMessage(FacesMessage.SEVERITY_INFO, "Removed",
-                        "Interest removed successfully");
+                        "Interest removed");
             } else {
                 // Add interest
                 userBean.registerInterest(currentUser.getuserId(), eventId, new Date());
                 isInterested = true;
                 addMessage(FacesMessage.SEVERITY_INFO, "Success",
-                        "Interest registered successfully");
+                        "Interest added");
             }
 
         } catch (Exception e) {
@@ -236,7 +236,7 @@ public class EventDetailsBean implements Serializable {
     }
 
     public String backToHome() {
-        return "home.jsf?faces-redirect=true";
+        return "Home.jsf?faces-redirect=true";
     }
 
     // Utility Methods
