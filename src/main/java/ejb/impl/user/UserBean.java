@@ -144,6 +144,16 @@ public class UserBean implements UserInterface {
         }
     }
     
+    @Override
+    public List<Interests> getUserInterests(Integer userId) {
+        TypedQuery<Interests> query = em.createQuery(
+                "SELECT i FROM Interests i WHERE i.userId.userId = :userId ORDER BY i.interestDate DESC",
+                Interests.class
+        );
+        query.setParameter("userId", userId);
+        return query.getResultList();
+    }
+    
     ////////////// WISHLISTS ////////////////
     @Override
     //@RolesAllowed({"User"})
@@ -180,6 +190,16 @@ public class UserBean implements UserInterface {
         if (wishlist != null) {
             em.remove(em.merge(wishlist));
         }
+    }
+    
+    @Override
+    public List<Wishlists> getUserWishlist(Integer userId) {
+        TypedQuery<Wishlists> query = em.createQuery(
+                "SELECT w FROM Wishlists w WHERE w.userId.userId = :userId ORDER BY w.addedDate DESC",
+                Wishlists.class
+        );
+        query.setParameter("userId", userId);
+        return query.getResultList();
     }
     
     ////////////// BOOKINGS /////////////////////

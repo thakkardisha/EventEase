@@ -184,13 +184,7 @@ public class HomeBean implements Serializable {
                 .value("My Bookings")
                 .icon("pi pi-ticket")
                 .command("#{homeBean.goToBookings}")
-                .build();
-
-        DefaultMenuItem settings = DefaultMenuItem.builder()
-                .value("Settings")
-                .icon("pi pi-cog")
-                .command("#{homeBean.goToSettings}")
-                .build();
+                .build();        
 
         DefaultMenuItem logout = DefaultMenuItem.builder()
                 .value("Logout")
@@ -199,8 +193,7 @@ public class HomeBean implements Serializable {
                 .build();
 
         userMenuModel.getElements().add(profile);
-        userMenuModel.getElements().add(bookings);
-        userMenuModel.getElements().add(settings);
+        userMenuModel.getElements().add(bookings);      
         userMenuModel.getElements().add(logout);
     }
 

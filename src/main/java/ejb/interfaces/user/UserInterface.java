@@ -5,9 +5,11 @@
 package ejb.interfaces.user;
 
 import entity.Bookings;
+import entity.Interests;
 import entity.Payments;
 import entity.Tickets;
 import entity.Users;
+import entity.Wishlists;
 import jakarta.ejb.Local;
 import java.util.Date;
 import java.util.List;
@@ -31,10 +33,12 @@ public interface UserInterface {
     ///////////// INTERESTS ////////////////////
     void registerInterest(Integer userId, Integer eId, Date interestDate);  
     void removeInterest(Integer interestId);
+    List<Interests> getUserInterests(Integer userId);
     
     ///////////// WISHLISTS //////////////////
     void addToWishlist(Integer userId, Integer eId, Date addedDate);
     void removeFromWishlist(Integer wishlistId);
+    List<Wishlists> getUserWishlist(Integer userId);
     
     
     //////////// BOOKINGS /////////////////
