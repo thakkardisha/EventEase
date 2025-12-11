@@ -155,8 +155,8 @@ public class HomeBean implements Serializable {
                     upcomingEvents = new ArrayList<>();
                 }
 
-                if (upcomingEvents.size() > 12) {
-                    upcomingEvents = upcomingEvents.subList(0, 12);
+                if (upcomingEvents.size() > 6) {
+                    upcomingEvents = upcomingEvents.subList(0, 5);
                 }
             } else {
                 System.err.println("Failed to load upcoming events. Status: " + response.getStatus());
