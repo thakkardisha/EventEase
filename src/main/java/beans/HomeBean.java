@@ -261,7 +261,7 @@ public class HomeBean implements Serializable {
         try {
             FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
             FacesContext.getCurrentInstance().getExternalContext()
-                    .redirect("/Logout.jsf");
+                    .redirect("/Login.jsf");
         } catch (IOException e) {
             e.printStackTrace();
         }

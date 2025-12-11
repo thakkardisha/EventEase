@@ -42,7 +42,7 @@ public class UserBean implements UserInterface {
     @Inject
     Pbkdf2PasswordHash passwordHasher;
     
-    /////////////////////// REGISTER //////////////////
+    /////////////////////// REGISTER AND UPDATE PROFILE //////////////////
     @Override
     public void register(String username, String fullName, String email,
             String password, int phone) {
@@ -75,6 +75,11 @@ public class UserBean implements UserInterface {
 
         // Merge back group only if needed
         em.merge(group);
+    }
+    
+    @Override
+    public void updateProfile(Users user) {
+        em.merge(user);
     }
 
     

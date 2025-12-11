@@ -20,6 +20,7 @@ entity\Tickets.class
 entity\ArtistSocialLinks.class
 beans\TicketDownloadBean.class
 entity\Coupons.class
+beans\ProfileBean.class
 beans\MyWishlistsBean.class
 beans\GenericCrudBean$2.class
 ejb\interfaces\user\UserInterface.class

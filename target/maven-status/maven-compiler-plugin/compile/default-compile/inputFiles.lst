@@ -47,5 +47,6 @@ D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\ejb\impl\user\UserBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\AdminDashboardBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Interests.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\converters\LocalDateConverter.java
+D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\beans\ProfileBean.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\eventease\resources\rest\user\UserResource.java
 D:\ICT\Sem1\102 - Java EE\EventEase\src\main\java\entity\Categories.java

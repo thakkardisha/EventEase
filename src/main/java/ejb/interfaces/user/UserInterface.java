@@ -24,8 +24,9 @@ public interface UserInterface {
 
     List<Users> getAllUsers();     
     
-    ///////////////////// REGISTER //////////////////
+    ///////////////////// REGISTER AND UPDATE PROFILE //////////////////
     void register(String username, String fullName, String email, String password, int phone);
+    void updateProfile(Users user);
     
     /////////////// REVIEWS /////////////
     void addReview(Integer userId, Integer eId, String review, Date rDate);
