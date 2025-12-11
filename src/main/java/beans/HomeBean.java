@@ -198,7 +198,7 @@ public class HomeBean implements Serializable {
     }
 
     public String viewCategoryEvents(Integer categoryId) {
-        return "category-events.jsf?faces-redirect=true&categoryId=" + categoryId;
+        return "category-events.jsf?faces-redirect=true&cId=" + categoryId;
     }
 
     public String viewEventDetails(Integer eventId) {

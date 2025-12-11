@@ -391,7 +391,7 @@
                 </div>
                 <div class="category-grid">
                     <ui:repeat value="#{homeBean.categories}" var="category">
-                        <a href="category-events.jsf?id=#{category.cId}" class="category-card">
+                        <a href="category-events.jsf?cId=#{category.cId}" class="category-card">
                             <img src="#{request.contextPath}/#{category.cImg}" alt="#{category.cName}" />
                         </a>
                     </ui:repeat>

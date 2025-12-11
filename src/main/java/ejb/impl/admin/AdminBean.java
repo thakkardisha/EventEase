@@ -174,7 +174,7 @@ public class AdminBean implements AdminInterface{
 //    }
 
     @Override
-    @RolesAllowed({"Admin"})
+    @PermitAll
     public List<Events> getAllEvents() {
         return em.createNamedQuery("Events.findAll", Events.class).getResultList();
     }
