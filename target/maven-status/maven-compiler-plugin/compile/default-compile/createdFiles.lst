@@ -18,6 +18,7 @@ client\UserClient.class
 entity\CouponUsage.class
 entity\Tickets.class
 entity\ArtistSocialLinks.class
+beans\TicketDownloadBean.class
 entity\Coupons.class
 beans\GenericCrudBean$2.class
 ejb\interfaces\user\UserInterface.class
@@ -48,4 +49,5 @@ eventease\JakartaRestConfiguration.class
 beans\AdminDashboardBean.class
 auth\SecureAuthentication.class
 entity\EventImages.class
+beans\BookingBean.class
 entity\AuditLogs.class

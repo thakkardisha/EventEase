@@ -6,6 +6,7 @@ package ejb.interfaces.user;
 
 import entity.Bookings;
 import entity.Payments;
+import entity.Tickets;
 import entity.Users;
 import jakarta.ejb.Local;
 import java.util.Date;
@@ -38,10 +39,13 @@ public interface UserInterface {
     
     //////////// BOOKINGS /////////////////
     void placeBooking(Bookings booking);
+    List<Bookings> getAllBookings();
     
     
     ////////////// PAYMENTS //////////////////
     Payments makePayment(Payments payment);
+    
+    List<Tickets> getAllTickets();
     
     ///////////// COUPONS ///////////
 //    boolean isCouponValid(String code);

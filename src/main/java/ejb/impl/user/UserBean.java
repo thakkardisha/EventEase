@@ -384,6 +384,11 @@ public class UserBean implements UserInterface {
         }
     }
     
+    @Override
+    public List<Bookings> getAllBookings() {
+        return em.createNamedQuery("Bookings.findAll", Bookings.class).getResultList();
+    }
+    
 
 //    private String generateSequentialTicketNumber(int index) {
 //        long timestamp = System.currentTimeMillis();
@@ -507,5 +512,10 @@ public class UserBean implements UserInterface {
     @Override
     public List<Users> getAllUsers() {
         return em.createNamedQuery("Users.findAll", Users.class).getResultList();
+    }
+    
+    @Override
+    public List<Tickets> getAllTickets() {
+        return em.createNamedQuery("Tickets.findAll", Tickets.class).getResultList();
     }
 }
