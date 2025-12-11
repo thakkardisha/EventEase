@@ -179,7 +179,7 @@ public class TicketDownloadBean implements Serializable {
             contentTable.addCell(qrCell);
 
             // QR Code label
-            PdfPCell qrLabel = new PdfPCell(new Phrase("Scan this QR code at the venue", labelFont));
+            PdfPCell qrLabel = new PdfPCell(new Phrase("QR code", labelFont));
             qrLabel.setBorder(Rectangle.NO_BORDER);
             qrLabel.setHorizontalAlignment(Element.ALIGN_CENTER);
             qrLabel.setPaddingTop(10);

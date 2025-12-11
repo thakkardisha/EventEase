@@ -114,9 +114,9 @@
             }
 
             .btn-primary {
-                background: linear-gradient(135deg, #A89BBF, #8B7BA8);
-                color: #F4F0F8;
-                border: none;
+                background: linear-gradient(135deg, #A89BBF, #8B7BA8) !important;
+                color: #F4F0F8 !important;
+                border: none !important;
             }
 
             .btn-primary:hover {
@@ -128,6 +128,7 @@
                 background: rgba(168, 155, 191, 0.2);
                 color: #F4F0F8;
                 border: 1px solid #A89BBF;
+                text-decoration: none;
             }
 
             .btn-secondary:hover {
@@ -165,22 +166,28 @@
 
                 <h1>Booking Confirmed!</h1>
 
-<!--                <p class="booking-id">
+                <p class="booking-id">
                     Booking ID: <strong>#{param.bookingId}</strong>
-                </p>-->
+                </p>
 
                 <p class="message">
-                    Thank you for your booking! Your payment has been processed successfully.                     
+                    Thank you for your booking! Your payment has been processed successfully. 
+                    Download your tickets below to access the event.
                 </p>
 
                 <div class="action-buttons">
                     <h:form>
-                        <p:commandButton value="View My Bookings" 
+                        <p:commandButton value="Download Ticket(s)" 
                                          styleClass="btn btn-primary"
-                                         icon="fas fa-ticket-alt"
-                                         action="my-bookings.jsf"
+                                         icon="fas fa-download"
+                                         actionListener="#{ticketDownloadBean.downloadTickets(param.bookingId)}"
                                          ajax="false"/>
                     </h:form>
+
+                    <a href="my-bookings.jsf" class="btn btn-secondary">
+                        <i class="fas fa-ticket-alt"></i>
+                        View My Bookings
+                    </a>
 
                     <a href="Home.jsf" class="btn btn-secondary">
                         <i class="fas fa-home"></i>

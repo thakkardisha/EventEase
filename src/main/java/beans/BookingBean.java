@@ -97,8 +97,4 @@ public class BookingBean implements Serializable {
     public List<Bookings> getMyBookings() {
         return myBookings;
     }
-
-//    public Users getCurrentUser() {
-//        return currentUser;
-//    }
 }

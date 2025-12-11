@@ -26,7 +26,7 @@
 
             /* Header */
             .payment-header {
-                background:  #0b043a !important;
+                background: #0b043a;
                 backdrop-filter: blur(6px);
                 padding: 15px 40px;
                 display: flex;
@@ -162,6 +162,7 @@
 
             .coupon-badge {
                 padding: 5px 12px;
+                margin-right: 40px;
                 border-radius: 20px;
                 font-size: 12px;
                 font-weight: bold;
@@ -200,7 +201,7 @@
             }
 
             .checkbox-wrapper {
-                font-size: 24px;
+                font-size: 18px;
                 cursor: pointer;
                 user-select: none;
             }
@@ -310,6 +311,50 @@
                 color: #A89BBF;
                 background: rgba(255, 255, 255, 0.04);
                 border-radius: 12px;
+            }
+
+            /* Payment Dialog Styles */
+            .payment-dialog .ui-dialog {
+                background: rgba(255, 255, 255, 0.06);
+                backdrop-filter: blur(6px);
+                border: 2px solid rgba(168, 155, 191, 0.3);
+                border-radius: 16px !important;
+            }
+
+            .payment-dialog .ui-dialog-titlebar {
+                background: rgba(168, 155, 191, 0.2) !important;
+                border-bottom: 1px solid rgba(168, 155, 191, 0.3);
+                color: #C8B8E8 !important;
+            }
+
+            .payment-dialog .ui-dialog-content {
+                background: #0b043a !important;
+            }
+
+            .btn-dialog-cancel {
+                padding: 12px 30px !important;
+                background: rgba(168, 155, 191, 0.2) !important;
+                border: 1px solid #A89BBF !important;
+                border-radius: 8px !important;
+                color: #F4F0F8 !important;
+                font-weight: bold !important;
+            }
+
+            .btn-dialog-cancel:hover {
+                background: rgba(168, 155, 191, 0.35) !important;
+            }
+
+            .btn-dialog-confirm {
+                padding: 12px 30px !important;
+                background: linear-gradient(135deg, #A89BBF, #8B7BA8) !important;
+                border: none !important;
+                border-radius: 8px !important;
+                color: #F4F0F8 !important;
+                font-weight: bold !important;
+            }
+
+            .btn-dialog-confirm:hover {
+                box-shadow: 0 4px 15px rgba(168, 155, 191, 0.6) !important;
             }
 
             /* Footer */
@@ -513,9 +558,7 @@
                         <p:commandButton value="Process Payment and Book" 
                                          styleClass="pay-button"
                                          icon="fas fa-lock"
-                                         action="#{paymentBean.processPayment}"
-                                         update="msgs"
-                                         ajax="false"/>
+                                         onclick="PF('confirmPaymentDialog').show(); return false;"/>
 
                         <div class="security-note">
                             <i class="fas fa-shield-alt"></i>
@@ -525,6 +568,51 @@
                 </div>
             </h:form>
         </div>
+
+        <!-- Payment Confirmation Dialog -->
+        <p:dialog header="Confirm Payment" 
+                  widgetVar="confirmPaymentDialog" 
+                  modal="true" 
+                  resizable="false"
+                  styleClass="payment-dialog"
+                  width="500">
+            <h:form>
+                <div style="padding: 20px; text-align: center;">
+                    <i class="fas fa-exclamation-circle" 
+                       style="font-size: 48px; color: #C8B8E8; margin-bottom: 20px;"></i>
+
+                    <h3 style="color: #F4F0F8; margin-bottom: 15px;">Confirm Your Payment</h3>
+
+                    <p style="color: #E0D5F0; margin-bottom: 10px;">
+                        You are about to pay 
+                        <strong style="color: #C8B8E8; font-size: 24px;">
+                            ₹<h:outputText value="#{paymentBean.finalAmount}">
+                                <f:convertNumber type="number" groupingUsed="true"/>
+                            </h:outputText>
+                        </strong>
+                    </p>
+
+                    <p style="color: #A89BBF; font-size: 14px; margin-bottom: 25px;">
+                        for #{paymentBean.ticketQuantity} ticket(s) to #{paymentBean.event.eName}
+                    </p>
+
+                    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                        <p:commandButton value="Cancel" 
+                                         styleClass="btn-dialog-cancel"
+                                         icon="fas fa-times"
+                                         onclick="PF('confirmPaymentDialog').hide(); return false;"/>
+
+                        <p:commandButton value="Confirm and Pay" 
+                                         styleClass="btn-dialog-confirm"
+                                         icon="fas fa-check"
+                                         action="#{paymentBean.processPayment}"
+                                         update="msgs"
+                                         ajax="false"
+                                         onclick="PF('confirmPaymentDialog').hide();"/>
+                    </div>
+                </div>
+            </h:form>
+        </p:dialog>
 
         <!-- Footer -->
         <div class="footer">
