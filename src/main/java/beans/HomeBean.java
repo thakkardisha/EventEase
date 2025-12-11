@@ -184,7 +184,19 @@ public class HomeBean implements Serializable {
                 .value("My Bookings")
                 .icon("pi pi-ticket")
                 .command("#{homeBean.goToBookings}")
-                .build();        
+                .build();
+
+        DefaultMenuItem interests = DefaultMenuItem.builder()
+                .value("Events Interested")
+                .icon("pi pi-thumbs-up")
+                .command("#{homeBean.goToInterests}")
+                .build();
+        
+        DefaultMenuItem wishlists = DefaultMenuItem.builder()
+                .value("Events Wishlisted")
+                .icon("pi pi-heart-fill")
+                .command("#{homeBean.goToWishlists}")
+                .build();
 
         DefaultMenuItem logout = DefaultMenuItem.builder()
                 .value("Logout")
@@ -193,7 +205,9 @@ public class HomeBean implements Serializable {
                 .build();
 
         userMenuModel.getElements().add(profile);
-        userMenuModel.getElements().add(bookings);      
+        userMenuModel.getElements().add(bookings); 
+        userMenuModel.getElements().add(interests);
+        userMenuModel.getElements().add(wishlists);
         userMenuModel.getElements().add(logout);
     }
 
@@ -223,14 +237,25 @@ public class HomeBean implements Serializable {
         }
     }
 
-    public void goToSettings() {
+    public void goToInterests() {
         try {
             FacesContext.getCurrentInstance().getExternalContext()
-                    .redirect("settings.jsf");
+                    .redirect("my-interests.jsf");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    
+    public void goToWishlists() {
+        try {
+            FacesContext.getCurrentInstance().getExternalContext()
+                    .redirect("my-wishlists.jsf");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
 
     public void logout() {
         try {
