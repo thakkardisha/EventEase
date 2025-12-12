@@ -24,6 +24,7 @@ import jwtrest.Constants;
 import record.KeepRecord;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
+import jakarta.servlet.ServletContext;
 
 @Named("genericCrudCDI")
 @SessionScoped
@@ -31,7 +32,7 @@ public class GenericCrudBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final String API_BASE = "https://localhost:8181/EventEase/api/admin/";
-    private static final String UPLOAD_BASE_DIR = "D:/ICT/Sem1/102 - Java EE/EventEase/uploads/";
+    private static final String UPLOAD_BASE_DIR = "EventEase/uploads/";
 
     @Inject
     private KeepRecord keepRecord;
@@ -83,8 +84,17 @@ public class GenericCrudBean implements Serializable {
     }
 
     private void createUploadDirectories() {
+        ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance()
+                .getExternalContext().getContext();
+        String absoluteUploadsPath = servletContext.getRealPath("/uploads");
+
+        if (absoluteUploadsPath == null) {
+            System.err.println("WARNING: Cannot determine absolute path for uploads.");
+            return;
+        }
+
         for (String subDir : imageFields.values()) {
-            File dir = new File(UPLOAD_BASE_DIR + subDir);
+            File dir = new File(absoluteUploadsPath, subDir);
             if (!dir.exists()) {
                 dir.mkdirs();
                 System.out.println("Created upload directory: " + dir.getAbsolutePath());
@@ -181,15 +191,36 @@ public class GenericCrudBean implements Serializable {
 
         try {
             String originalFileName = uploadedFile.getFileName();
-            String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
+
+            // CRITICAL: Sanitize filename - remove spaces and special characters
+            String sanitizedFileName = originalFileName
+                    .replaceAll("\\s+", "_") // Replace spaces with underscores
+                    .replaceAll("[^a-zA-Z0-9._-]", ""); // Remove special chars except .-_
+
+            String extension = sanitizedFileName.substring(sanitizedFileName.lastIndexOf("."));
+            String nameWithoutExt = sanitizedFileName.substring(0, sanitizedFileName.lastIndexOf("."));
+            String uniqueFileName = System.currentTimeMillis() + "_" + nameWithoutExt + extension;
 
             // Get subdirectory for this field
             String subDir = imageFields.getOrDefault(fieldName, "misc");
-            String uploadDir = UPLOAD_BASE_DIR + subDir + "/";
 
-            File uploadFile = new File(uploadDir + uniqueFileName);
-            uploadFile.getParentFile().mkdirs();
+            // Use ServletContext to get the real deployment path
+            ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance()
+                    .getExternalContext().getContext();
+            String realUploadPath = servletContext.getRealPath("/uploads/" + subDir);
+
+            System.out.println("Real upload path: " + realUploadPath);
+            System.out.println("Sanitized filename: " + uniqueFileName);
+
+            // Create directory if it doesn't exist
+            File uploadDir = new File(realUploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+                System.out.println("Created directory: " + uploadDir.getAbsolutePath());
+            }
+
+            // Create the target file in the deployment directory
+            File uploadFile = new File(uploadDir, uniqueFileName);
 
             // Write file
             try (InputStream input = uploadedFile.getInputStream(); FileOutputStream output = new FileOutputStream(uploadFile)) {
@@ -203,7 +234,7 @@ public class GenericCrudBean implements Serializable {
             // Store relative path in currentRecord
             String relativePath = "uploads/" + subDir + "/" + uniqueFileName;
 
-            // CRITICAL: Ensure currentRecord exists
+            // Ensure currentRecord exists
             if (currentRecord == null) {
                 currentRecord = new LinkedHashMap<>();
             }
@@ -213,8 +244,9 @@ public class GenericCrudBean implements Serializable {
             // Clear the uploaded file reference
             uploadedFile = null;
 
-            System.out.println("File uploaded: " + uploadFile.getAbsolutePath());
+            System.out.println("File uploaded to: " + uploadFile.getAbsolutePath());
             System.out.println("Stored path: " + relativePath);
+            System.out.println("File exists check: " + uploadFile.exists());
             System.out.println("Current record AFTER: " + currentRecord);
             facesInfo("Image uploaded successfully: " + originalFileName);
 
