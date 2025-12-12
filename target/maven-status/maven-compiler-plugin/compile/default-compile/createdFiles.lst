@@ -48,6 +48,7 @@ beans\MyInterestsBean.class
 beans\HomeBean.class
 beans\GenericCrudBean.class
 config\Project.class
+beans\SearchResultsBean.class
 entity\Artists.class
 eventease\JakartaRestConfiguration.class
 beans\AdminDashboardBean.class

@@ -191,7 +191,7 @@ public class HomeBean implements Serializable {
                 .icon("pi pi-thumbs-up")
                 .command("#{homeBean.goToInterests}")
                 .build();
-        
+
         DefaultMenuItem wishlists = DefaultMenuItem.builder()
                 .value("Events Wishlisted")
                 .icon("pi pi-heart-fill")
@@ -205,7 +205,7 @@ public class HomeBean implements Serializable {
                 .build();
 
         userMenuModel.getElements().add(profile);
-        userMenuModel.getElements().add(bookings); 
+        userMenuModel.getElements().add(bookings);
         userMenuModel.getElements().add(interests);
         userMenuModel.getElements().add(wishlists);
         userMenuModel.getElements().add(logout);
@@ -245,7 +245,7 @@ public class HomeBean implements Serializable {
             e.printStackTrace();
         }
     }
-    
+
     public void goToWishlists() {
         try {
             FacesContext.getCurrentInstance().getExternalContext()
@@ -254,8 +254,6 @@ public class HomeBean implements Serializable {
             e.printStackTrace();
         }
     }
-    
-    
 
     public void logout() {
         try {
@@ -267,15 +265,11 @@ public class HomeBean implements Serializable {
         }
     }
 
-    public void searchEvents() {
-        try {
-            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-                FacesContext.getCurrentInstance().getExternalContext()
-                        .redirect("search-results.jsf?q=" + searchQuery);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    public String searchEvents() {
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            return "search-results.jsf?faces-redirect=true&q=" + searchQuery;
         }
+        return null;
     }
 
     // Getters and Setters

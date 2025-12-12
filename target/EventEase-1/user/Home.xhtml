@@ -179,7 +179,7 @@
                 height: 50px !important;
                 border-radius: 50% !important;
             }
-            
+
             .ui-carousel .ui-carousel-indicators {
                 color: #5a428a !important;
             }
@@ -212,7 +212,7 @@
                 display: flex;
                 gap: 20px;
                 overflow-x: auto;
-                flex-wrap : wrap; 
+                flex-wrap : wrap;
                 padding: 20px 0;
                 scroll-behavior: smooth;
             }
@@ -345,10 +345,14 @@
                     <div class="search-container">
                         <p:inputText placeholder="Search events..." 
                                      value="#{homeBean.searchQuery}"
-                                     onkeypress="if (event.keyCode == 13) {
-                                                 searchEvents();
+                                     onkeydown="if (event.keyCode == 13) {
+                                                 document.getElementById('searchFormBtn').click();
                                                  return false;
                                              }"/>
+                        <p:commandButton id="searchFormBtn"
+                                         action="#{homeBean.searchEvents}"
+                                         ajax="false"
+                                         style="display:none;"/>
                     </div>
                     <p:menuButton value="☰" model="#{homeBean.userMenuModel}"/>
                 </h:form>
