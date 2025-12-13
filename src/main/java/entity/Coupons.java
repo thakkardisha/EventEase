@@ -84,17 +84,14 @@ public class Coupons implements Serializable {
     private String status;
     @Column(name = "is_single_use")
     private Boolean isSingleUse = false;
-    
-    // FIXED: ManyToMany with Events (for event-specific coupons)
+        
     // If eventsCollection is empty, it's a general coupon valid for all events
     @ManyToMany(mappedBy = "couponsCollection")
+    @JsonbTransient
     private Collection<Events> eventsCollection;
-    
-    // REMOVED: The eId ManyToOne field - it was redundant and conflicting
-    // Event-specific coupons are now handled via the eventsCollection
-    
-    // FIXED: ManyToMany with Bookings
+        
     @ManyToMany(mappedBy = "couponsCollection")
+    @JsonbTransient
     private Collection<Bookings> bookingsCollection;
 
     public Coupons() {

@@ -32,7 +32,7 @@ public class GenericCrudBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final String API_BASE = "https://localhost:8181/EventEase/api/admin/";
-    private static final String UPLOAD_BASE_DIR = "EventEase/uploads/";
+    private static final String UPLOAD_BASE_DIR = "D:/ICT/Sem1/102 - Java EE/EventEase/uploads/";
 
     @Inject
     private KeepRecord keepRecord;

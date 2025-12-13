@@ -15,6 +15,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -65,6 +66,14 @@ public class PaymentBean implements Serializable {
                 ticketQuantity = Integer.parseInt(quantityParam);
 
                 loadEventAndCoupons();
+
+                // Check if enough seats are available
+                if (!checkSeatAvailability()) {
+                    addMessage(FacesMessage.SEVERITY_ERROR, "Sold Out",
+                            "Sorry, not enough seats available for this event.");
+                    return;
+                }
+
                 calculateAmounts();
             } else {
                 addMessage(FacesMessage.SEVERITY_ERROR, "Error",
@@ -76,6 +85,28 @@ public class PaymentBean implements Serializable {
             addMessage(FacesMessage.SEVERITY_ERROR, "Error",
                     "Failed to initialize payment: " + e.getMessage());
         }
+    }
+
+    private boolean checkSeatAvailability() {
+        if (event == null) {
+            return false;
+        }
+
+        Integer maxCapacity = event.getmaxCapacity();
+        Integer bookedSeats = event.getbookedSeats();
+
+        if (maxCapacity == null || bookedSeats == null) {
+            return true; // If not set, allow booking
+        }
+
+        int availableSeats = maxCapacity - bookedSeats;
+
+        System.out.println("Max Capacity: " + maxCapacity);
+        System.out.println("Booked Seats: " + bookedSeats);
+        System.out.println("Available Seats: " + availableSeats);
+        System.out.println("Requested Tickets: " + ticketQuantity);
+
+        return availableSeats >= ticketQuantity;
     }
 
     private void loadEventAndCoupons() {
@@ -239,6 +270,7 @@ public class PaymentBean implements Serializable {
         }
     }
 
+    @Transactional
     public String processPayment() {
         try {
             System.out.println("========== Processing Payment ==========");
@@ -256,6 +288,36 @@ public class PaymentBean implements Serializable {
             System.out.println("Ticket Quantity: " + ticketQuantity);
             System.out.println("Final Amount: " + finalAmount);
             System.out.println("Selected Coupons: " + selectedCoupons.size());
+
+            // Refresh event to get latest data and lock for update
+            event = em.find(Events.class, eventId);
+            if (event == null) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Error", "Event not found");
+                return null;
+            }
+
+            // Check seat availability again (double-check with latest data)
+            if (!checkSeatAvailability()) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Sold Out",
+                        "Sorry, these seats were just booked by someone else.");
+                return null;
+            }
+
+            // Update booked seats
+            Integer currentBookedSeats = event.getbookedSeats() != null ? event.getbookedSeats() : 0;
+            event.setbookedSeats(currentBookedSeats + ticketQuantity);
+
+            System.out.println("Updated booked seats: " + event.getbookedSeats());
+
+            // Check if event is now sold out
+            if (event.getmaxCapacity() != null
+                    && event.getbookedSeats() >= event.getmaxCapacity()) {
+                event.setstatus("Sold Out");
+                System.out.println("Event marked as Sold Out");
+            }
+
+            // Merge the updated event
+            event = em.merge(event);
 
             // Create booking object
             Bookings booking = new Bookings();
